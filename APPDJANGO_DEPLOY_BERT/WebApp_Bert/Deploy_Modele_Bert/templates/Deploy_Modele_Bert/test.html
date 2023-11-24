@@ -1,0 +1,14 @@
+# listings/templates/listings/hello.html
+<html>
+    <head><title>Merchex</title></head>
+    <body>
+        <h1>Hello Django !</h1>
+        <p>Mes groupes préférés sont :</p>
+        
+        {% if not df.empty %}
+        <p>{{ df }}</p>
+    {% else %}
+        <p>No file content available</p>
+    {% endif %}
+    </body>
+</html>
