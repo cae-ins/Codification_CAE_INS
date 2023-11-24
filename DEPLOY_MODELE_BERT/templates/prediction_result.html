@@ -1,0 +1,21 @@
+<!-- templates/prediction_result.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction de SIC code</title>
+</head>
+<body>
+    <h1>Résultats de la prédiction</h1>
+    <p>Texte : {{ text }}</p>
+    <p>Top 5 des codes SIC prédits :</p>
+    <ul>
+        {% for i, (sic_code, certainty) in predictions %}
+        <li>{{ i }}. SIC code: {{ sic_code }}, Certainty: {{ certainty:.4f }}</li>
+        {% endfor %}
+
+    </ul>
+</body>
+</html>
