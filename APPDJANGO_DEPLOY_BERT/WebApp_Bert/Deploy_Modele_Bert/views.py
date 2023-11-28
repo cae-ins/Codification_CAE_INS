@@ -64,11 +64,11 @@ def predict(request):
     return render(request,'Deploy_Modele_Bert/download_page.html')
     
 
-
-
 def index(request):
    #Renvoyer la page pour charger le fichier
-   return render(request,'Deploy_Modele_Bert/page_loading.html')
+   #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png') 
+   img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
+   return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
 
 def download_transformed_csv(request):
     # Chemin vers le fichier transformé
