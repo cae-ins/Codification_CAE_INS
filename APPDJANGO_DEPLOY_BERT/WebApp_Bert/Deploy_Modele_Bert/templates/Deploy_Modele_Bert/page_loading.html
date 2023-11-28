@@ -3,42 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Selection Form</title>
+    <title>loading page</title>
     <!-- Link to Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            padding: 50px;
-        }
-        .custom-form {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .btn-upload {
-            background-color: #28a745;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-            padding: 10px;
-            cursor: pointer;
-        }
-        .title {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap">
+
+
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/header.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/container.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/footer.css' %}">
+   
+    <!-- Style pour le Header -->
 </head>
 <body>
+    <header class="header header-shadow">
+        <nav class="nv1">
+            <a class="brand" href="https://ins.ci/" title="INS_CAE">
+                <img src="{% static img_path %}" alt="INS_CAE"  class = "logo_ins"/>
+            </a>
+            <h1 class="h1">Transformez vos fichiers de codage</h1>
+            <div class="db">DataLab</div>
+        </nav>
+    </header>
+    <h2 class="h2">Chargez le fichier .CSV avec le Libellé</h2>
+    <div class="pr">
+    <span class="nb">La transformation est très facile et rapide !</span>
+    <span class="nb1">Prenez la peine de vérifier la structure de votre fichier.</span>
+    </div>
     <div class="container">
         <div class="custom-form">
             <div class="title">SELECTIONNER LE FICHIER</div>
@@ -52,6 +46,16 @@
             </form>
         </div>
     </div>
+
+  
+    <!-- Le contenu de votre page ici -->
+
+    <div class="footer">
+        <div class="footer__copy">
+            &copy; INS 2023 &reg; - Codification
+        </div>
+    </div>
+</body>
 
     <!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

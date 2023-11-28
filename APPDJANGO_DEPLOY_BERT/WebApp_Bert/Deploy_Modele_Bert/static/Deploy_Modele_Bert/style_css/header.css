@@ -1,0 +1,130 @@
+
+       /* body {
+            background-color: #116590;
+            padding: 50px;
+            margin: 0;
+        }
+        /* Ajout d'une texture au corps de la page */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /*background-image: url('lien-vers-votre-texture.jpg');*/ /* Remplacez par le lien vers votre texture */
+            opacity: 0.1; /* Ajustez l'opacité selon vos besoins */
+            z-index: -1;
+        }
+        .custom-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin-top: 50px; /* Ajout d'une marge pour séparer du header */
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .btn-upload {
+            background-color: #28a745;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        /* Ajout de styles pour l'en-tête */
+        .header {
+            width: 100%;
+            height: 12%;
+            background-color: #ffffff;
+            color: #ffffff;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 10px;
+            
+        }
+        .header::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        .brand img {
+            max-width: 62px; /* Ajustez la largeur du logo selon vos besoins */
+            height:auto ;
+            position: relative;
+            left: 10px;
+        
+        }
+        .menu {
+            float: left;
+            margin-top: 15px;
+        }
+        .menu a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        .menu ul {
+            list-style: none;
+            margin: 0;
+        }
+        .menu li {
+            margin-right: 15px;
+            display: inline;
+        }
+        .actions {
+            float: right;
+            margin-top: 15px;
+        }
+        .actions a {
+            color: #ffffff;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .header-shadow {
+            box-shadow: 0px 10px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        .header h1 {
+            color: black;
+            /* Ajuster la taille du texte */
+            font-size: 36px; /* Choisissez la taille qui vous convient */
+            text-align: center;
+            position: relative;
+            top: -50px;
+            font-family: 'Roboto', sans-serif;
+            
+        
+            /* Ajouter de l'espace autour du texte */
+           
+        }
+
+        .nv1{
+            position: relative;
+        }
+
+        .db{
+            
+            color:blue;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            left: 1400px;
+            top: 20px;
+        }
+
+        
+    
