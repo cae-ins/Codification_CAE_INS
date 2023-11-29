@@ -31,7 +31,9 @@ body {
 }
 .container {
 
-    margin-top: 200px;
+    margin-top: 250px;
+    margin-left: 230px;
+    
 }
 
 
@@ -69,4 +71,27 @@ body {
     left: 250px;
     color: rgb(81, 81, 81);
 }
+
+.btn2{
+
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    width: 300px; /* Ajustez la largeur selon vos besoins */
+    height: 70px;
+    background-color: orange; /* Couleur de fond orange */
+    color: white; /* Couleur du texte en blanc pour un meilleur contraste */
+    padding: 10px; /* Ajoutez un espace autour du texte */
+    border: none; /* Supprimez la bordure par défaut du bouton */
+    text-align: center; /* Centrez le texte dans le bouton */
+    text-decoration: none; /* Supprimez la décoration du texte (comme le soulignement) */
+    display: inline-block; /* Assurez-vous que le bouton se comporte comme un élément en ligne */
+    font-size: 20px; /* Ajustez la taille de la police selon vos besoins */
+    border-radius: 5px; /* Ajoutez des coins arrondis */
+    cursor: pointer;
+    font-weight: bold ;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    
+}
+
 
