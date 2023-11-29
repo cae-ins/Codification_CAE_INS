@@ -15,6 +15,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/header.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/container.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/footer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Deploy_Modele_Bert/style_css/modal.css' %}">
+    
    
     <!-- Style pour le Header -->
 </head>
@@ -24,30 +26,32 @@
             <a class="brand" href="https://ins.ci/" title="INS_CAE">
                 <img src="{% static img_path %}" alt="INS_CAE"  class = "logo_ins"/>
             </a>
-            <h1 class="h1">Transformez vos fichiers de codage</h1>
+            <h1 class="h1">Transformer vos fichiers de codage</h1>
             <div class="db">DataLab</div>
         </nav>
     </header>
-    <h2 class="h2">Chargez le fichier .CSV avec le Libellé</h2>
+    <h2 class="h2">Charger le fichier .CSV avec le Libellé</h2>
     <div class="pr">
     <span class="nb">La transformation est très facile et rapide !</span>
     <span class="nb1">Prenez la peine de vérifier la structure de votre fichier.</span>
     </div>
-    <div class="container">
-        <div class="custom-form">
-            <div class="title">SELECTIONNER LE FICHIER</div>
-            <form action="{% url 'predict' %}" method="post" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="file">Fichier:</label>
-                    {% csrf_token %}
-                    <input type="file"  class="form-control-file" id="file" name="file" accept=".csv">
-                </div>
+    <button id="openModalBtn" class="btn2">Sélectionner les fichiers CSV</button>
+      <div id="myModal" class="modal">
+        <div  class="container">
+            <div class="custom-form">
+             <span class="close" id="closeModalBtn">&times;</span>
+                <div class="title">SELECTIONNER LE FICHIER</div>
+                <form action="{% url 'predict' %}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                       <label for="file">Fichier:</label>
+                       {% csrf_token %}
+                       <input type="file"  class="form-control-file" id="file" name="file" accept=".csv">
+                    </div>
                 <button type="submit" class="btn btn-upload" value="Predict">Transformer</button>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-
-  
+  </div> 
     <!-- Le contenu de votre page ici -->
 
     <div class="footer">
@@ -57,6 +61,7 @@
     </div>
 </body>
 
+    <script src="{% static 'Deploy_Modele_Bert/scripts/modal.js' %}"></script>
     <!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
