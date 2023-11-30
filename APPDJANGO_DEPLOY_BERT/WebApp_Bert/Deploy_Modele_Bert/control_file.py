@@ -9,8 +9,11 @@ class VerificateurTexte:
 
     @staticmethod
     def verifie_trois_successifs(texte):
-        for i in range(len(texte) - 2):
-            if texte[i] == texte[i + 1] == texte[i + 2]:
+        # Retirer les espaces du texte
+        texte_sans_espaces = texte.replace(" ", "")
+    
+        for i in range(len(texte_sans_espaces) - 2):
+            if texte_sans_espaces[i] == texte_sans_espaces[i + 1] == texte_sans_espaces[i + 2]:
                 return True
         return False
 

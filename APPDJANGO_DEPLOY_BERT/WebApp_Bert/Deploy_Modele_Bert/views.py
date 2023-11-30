@@ -45,18 +45,19 @@ def predict(request):
       # Scripts de transformation du fichier csv
       j=-1
       caracteres_errones = []
-      for text in f_input['libelle'].astype(str):
+      for index, row in f_input.iterrows():
          
-         
-         #Condition de verification
+         j+=1
+         text = str(row['libelle'])
+         #Condition de verification des caractères du libellé
          if verificateur.verifie_longueur(text) or verificateur.verifie_caractere_unique(text) or \
          verificateur.verifie_trois_successifs(text) or verificateur.verifie_chiffres_uniquement(text):
             
             caracteres_errones.append(text)
+            f_input = f_input.drop(index)
 
          else:
-
-           j+=1
+   
            # Prédiction avec le modèle et le tokenizer chargés
            predictions = predict_sic_code(text, model, tokenizer, label_encoder)
            clef =[]
@@ -71,7 +72,7 @@ def predict(request):
            f_input.loc[j, 'Code'] = cle_max
            f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
       
-      #Exportation du fichier contenant des données érroné
+      #Exportation du fichier contenant des données érronées
       df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
       errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
       df_errone.to_csv(errone_file_path, sep =';', index=False)
