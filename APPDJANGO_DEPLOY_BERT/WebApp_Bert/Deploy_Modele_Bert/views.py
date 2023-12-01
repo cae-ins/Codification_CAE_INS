@@ -83,11 +83,6 @@ def predict(request):
       f_input.to_csv(transformed_file_path, sep =';', index=False)
     #Renvoyer la page pour telecharger le fichier
     return render(request,'Deploy_Modele_Bert/download_page.html')
-<<<<<<< HEAD
-    
-=======
->>>>>>> Control-Fichier
-
 def index(request):
    #Renvoyer la page pour charger le fichier
    #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png') 
