@@ -12,6 +12,12 @@ import pickle
 from django.http import FileResponse
 import zipfile
 import io
+import tempfile
+import shutil
+
+# Créer des répertoires temporaires
+temp_dir = tempfile.mkdtemp()
+temp_dir1 = tempfile.mkdtemp()
 
 def predict(request):
     
@@ -72,27 +78,37 @@ def predict(request):
            f_input.loc[j, 'Code'] = cle_max
            f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
       
-      #Exportation du fichier contenant des données érronées
+      #Exportation du fichier contenant des données érronées sur le serveur
       df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
-      errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
-      df_errone.to_csv(errone_file_path, sep =';', index=False)
+        #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
+        #df_errone.to_csv(errone_file_path, sep =';', index=False)
+      errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+      df_errone.to_csv(errone_file_path, sep=';', index=False)
       
-      # Créez le chemin du fichier transformé dans le nouveau dossier
-      transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
-      # Enregistrez le DataFrame transformé au format CSV
-      f_input.to_csv(transformed_file_path, sep =';', index=False)
-    #Renvoyer la page pour telecharger le fichier
-    return render(request,'Deploy_Modele_Bert/download_page.html')
+      #Exportation du fichier contenant des données transformées sur le serveur
+        #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
+        #f_input.to_csv(transformed_file_path, sep =';', index=False)
+      
+      transformed_file_path = os.path.join(temp_dir1, 'transformed_data.csv')
+      f_input.to_csv(transformed_file_path, sep=';', index=False)
+
+      #Renvoyer la page pour telecharger le fichier
+      return render(request,'Deploy_Modele_Bert/download_page.html')
+    
 def index(request):
+    
    #Renvoyer la page pour charger le fichier
    #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png') 
-   img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
-   return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
+    img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
+    return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
 
 def download_transformed_csv(request):
    # Chemins vers les fichiers transformés
-    transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
-    errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
+    #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
+    guide_file_path = os.path.join(settings.MEDIA_ROOT, 'guide', 'guide.xlsx')
+    transformed_file_path = os.path.join(temp_dir1, 'transformed_data.csv')
+    #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
+    errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
 
     # Créez un objet Zip
     zip_buffer = io.BytesIO()
@@ -100,6 +116,12 @@ def download_transformed_csv(request):
         # Ajoutez les fichiers au zip
         zip_file.write(transformed_file_path, arcname='transformed_data.csv')
         zip_file.write(errone_file_path, arcname='errone_data.csv')
+        zip_file.write(guide_file_path, arcname='guide.xlsx')
+
+
+    #Suppression des repertoires temporaires
+    shutil.rmtree(temp_dir)
+    shutil.rmtree(temp_dir1)
 
     # Répondez avec le contenu du zip
     response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
