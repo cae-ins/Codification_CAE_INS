@@ -22,10 +22,12 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
     path('predict/', views.predict, name="predict"),
     path('', views.index),
     path('download_transformed_csv/', views.download_transformed_csv, name='download_transformed_csv'),
+    path('download_page/', views.download_page, name='download_page'),
 
 ]
 

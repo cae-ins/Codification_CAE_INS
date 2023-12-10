@@ -14,15 +14,21 @@ import zipfile
 import io
 import tempfile
 import shutil
+from django.http import JsonResponse, HttpResponseBadRequest
 
-# Créer des répertoires temporaires
-temp_dir = tempfile.mkdtemp()
-temp_dir1 = tempfile.mkdtemp()
-
+#Fonction pour la transformation du fichier
 def predict(request):
     
     #L'objet contenant les critères de verification
     verificateur = VerificateurTexte()
+
+    # Créer des répertoires temporaires
+    temp_dir = tempfile.mkdtemp()
+    temp_dir1 = tempfile.mkdtemp()
+
+    # Stocker les valeurs dans la session
+    request.session['temp_dir'] = temp_dir
+    request.session['temp_dir1'] = temp_dir1
     
     # Emplacements où le modèle et le tokenizer ont été sauvegardés
     model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_model_runpod_distillbert')
@@ -37,9 +43,9 @@ def predict(request):
     # Charger le tokenizer associé
     tokenizer = DistilBertTokenizerFast.from_pretrained(tokenizer_load_path)
 
-    if request.method == 'POST' and request.FILES['file']:
+    if request.method == 'POST' and request.FILES :
       
-      input_file = request.FILES['file']
+      input_file = request.FILES.get("file")
       file_content = input_file.read().decode('latin-1')
         
       # Utiliser StringIO pour créer un objet fichier virtuel
@@ -48,7 +54,6 @@ def predict(request):
       # Lire le contenu CSV dans un DataFrame
       f_input = pd.read_csv(file_object, sep=";", encoding="latin-1")
 
-      # Scripts de transformation du fichier csv
       j=-1
       caracteres_errones = []
       for index, row in f_input.iterrows():
@@ -77,33 +82,45 @@ def predict(request):
            cle_max = max(dict_pred, key=dict_pred.get)
            f_input.loc[j, 'Code'] = cle_max
            f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
-      
+
       #Exportation du fichier contenant des données érronées sur le serveur
       df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
-        #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
-        #df_errone.to_csv(errone_file_path, sep =';', index=False)
+      #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
+      #df_errone.to_csv(errone_file_path, sep =';', index=False)
       errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
       df_errone.to_csv(errone_file_path, sep=';', index=False)
       
       #Exportation du fichier contenant des données transformées sur le serveur
-        #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
-        #f_input.to_csv(transformed_file_path, sep =';', index=False)
+      #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
+      #f_input.to_csv(transformed_file_path, sep =';', index=False)
       
       transformed_file_path = os.path.join(temp_dir1, 'transformed_data.csv')
       f_input.to_csv(transformed_file_path, sep=';', index=False)
 
       #Renvoyer la page pour telecharger le fichier
-      return render(request,'Deploy_Modele_Bert/download_page.html')
+      return JsonResponse({'retour': 'ok'})
     
+   
+   
+#Fonction qui retourne la page d'accueil   
 def index(request):
     
    #Renvoyer la page pour charger le fichier
    #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png') 
-    img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
-    return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
+   img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
+   return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
 
+#Fonction qui retourne la page de téléchargement
+def download_page(request):
+    return render(request, 'Deploy_Modele_Bert/download_page.html')
+
+#Fonction pour le telechargement du fichier transformé
 def download_transformed_csv(request):
-   # Chemins vers les fichiers transformés
+
+    # Récupérer les valeurs depuis la session
+    temp_dir = request.session.get('temp_dir')
+    temp_dir1 = request.session.get('temp_dir1')
+    # Chemins vers les fichiers transformés
     #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
     guide_file_path = os.path.join(settings.MEDIA_ROOT, 'guide', 'guide.xlsx')
     transformed_file_path = os.path.join(temp_dir1, 'transformed_data.csv')
