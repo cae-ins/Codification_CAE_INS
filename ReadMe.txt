@@ -22,5 +22,7 @@ ETAPE 3 :
 
 ETAPE 4 :
 
+
 - Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse http://127.0.0.1:8000
+- NB : Assurez-vous d'avoir acces à internet pour une bonne affichage de la page.
 
