@@ -1,7 +1,7 @@
 # GUIDE DE LANCEMENT DE L'APPLICATION CODIFICATION EN LOCAL
 ### ETAPE 1: Cloner le projet depuis le repertoire distant de la branche New_Design sur github .
 ```
-git clone https://github.com/cae-ins/Codification_CAE_INS/tree/New_Design
+git clone https://github.com/cae-ins/Codification_CAE_INS
 ```
 
 ### ETAPE 2: Téléchargement du fichier de poids depuis le lien ci-après
