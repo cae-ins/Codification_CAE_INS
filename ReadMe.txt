@@ -2,12 +2,13 @@
 
 ETAPE 1:
 
-- Cloner le projet depuis le repertoire distant avec la methode traditionnelle sur github.
+- Cloner le projet depuis le repertoire distant de la branche New_Design sur github .
 
 ETAPE 2:
  
-- Lien partagé :
-- Mot de passe :
+- Lien partagé : https://gouvci-my.sharepoint.com/:f:/g/personal/cae_stat_plan_gouv_ci/EnUuEiOAcaxCpIWzOdxKVxMB_aNvkUNweq4_IdpYMcb9Bg?e=ZTqlAg
+
+- Mot de passe : 2hb4SzA4
 
 Accedez au repertoire du lien partagé avec le mot de passe ci-dessus. Copier tout le contenu de ce repertoire pour le deposer dans le repertoire \APPDJANGO_DEPLOY_BERT\WebApp_Bert\Deploy_Modele_Bert\static\Deploy_Modele_Bert de votre depot local.
 
