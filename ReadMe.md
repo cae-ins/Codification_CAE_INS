@@ -17,10 +17,10 @@ Copier tout le contenu de ce repertoire pour le deposer dans le repertoire ``\AP
 
 ### ETAPE 3 : Lancement de l'application de codification
 
-- Ouvrez votre invite de commande, positionnez-vous dans le repertoire \APPDJANGO_DEPLOY_BERT de votre depot local.
-- Ensuite tapez la commande suivante pour activer l'environnement virtuel: env\Scripts\activate.bat
-- Toujours dans la meme posture, tapez la commande suivante : cd WebApp_Bert
-- Ensuite saisissez la commande suivante pour lancer le serveur Django: python manage.py runserver
+- Ouvrez votre invite de commande, positionnez-vous dans le repertoire ``\APPDJANGO_DEPLOY_BERT`` de votre depot local.
+- Ensuite tapez la commande suivante pour activer l'environnement virtuel: ``env\Scripts\activate.bat``
+- Toujours dans la meme posture, tapez la commande suivante : ``cd WebApp_Bert``
+- Ensuite saisissez la commande suivante pour lancer le serveur Django: ``python manage.py runserver``
 
 ### ETAPE 4 : C'est parti, vous pouvez tester !!!!
 
