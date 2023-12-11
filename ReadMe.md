@@ -24,6 +24,6 @@ Copier tout le contenu de ce repertoire pour le deposer dans le repertoire ``\AP
 
 ### ETAPE 4 : C'est parti, vous pouvez tester !!!!
 
-- Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse http://127.0.0.1:8000
+- Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
 - NB : Assurez-vous d'avoir acces à internet pour un bon affichage de la page.
 
