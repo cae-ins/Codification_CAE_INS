@@ -1,4 +1,4 @@
------------------------------------------GUIDE DE LANCEMENT DU PROJET EN LOCAL(Windows)-------------------------------------------------
+## GUIDE DE LANCEMENT DU PROJET EN LOCAL SOUS WINDOWS
 
 ETAPE 1:
 
