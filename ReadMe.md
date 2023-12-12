@@ -1,4 +1,4 @@
-# GUIDE DE LANCEMENT DE L'APPLICATION CODIFICATION EN LOCAL
+# GUIDE DE LANCEMENT DE L'APPLICATION DE CODIFICATION EN LOCAL
 
 ## ETAPE 1: Cloner le projet depuis le repertoire distant de la branche New_Design sur github .
 ```
