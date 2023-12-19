@@ -53,7 +53,7 @@ Copier tout le contenu de ce repertoire pour le deposer dans le repertoire ``\AP
 ### ETAPE 1 : Installation de l'application Docker
 Il faut avoir impérativement Docker sur sa machine. Vous pourrez l'installer via le lien suivant : ``https://www.docker.com/products/docker-desktop/``. Il faudra activer la virtualisation sur votre ordinateur avant l'installation de ``Docker Desktop``.
 
-### ETAPE 3 : Installation de l'image Docker de l'application
+### ETAPE 2 : Installation de l'image Docker de l'application
 
 1. En premier, il faudra démarrer l'application ``Docker Desktop`` sur votre machine.
 2. Ouvrez votre invite de commande, positionnez-vous dans le repertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert`` de votre depôt local.
