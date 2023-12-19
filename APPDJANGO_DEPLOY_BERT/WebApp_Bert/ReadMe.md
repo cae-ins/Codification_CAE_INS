@@ -50,20 +50,23 @@ Copier tout le contenu de ce repertoire pour le deposer dans le repertoire ``\AP
 
 ## METHODE3 AVEC DOCKER
 
-### ETAPE 1: // //
+### ETAPE 1 : Installation de l'application Docker
+Il faut avoir impérativement Docker sur sa machine.
 
-### ETAPE 2: // //
+### ETAPE 2 : // //
 
 ### ETAPE 3 : Lancement de l'application de codification
 
-- NB : Il faut avoir imperativement Docker sur sa machine.
-- Demarer l'application Docker Desktop sur votre machine.
+- NB : Il faut avoir impérativement Docker sur sa machine.
+- Démarrer l'application Docker Desktop sur votre machine.
 - Ouvrez votre invite de commande, positionnez-vous dans le repertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert`` de votre depot local.
 - Ensuite exécuter la commande suivante pour construire l'image : ``docker-compose build``
 - Ensuite exécuter la commande suivante pour lancer le conteneur : ``docker-compose up``
 
-### ETAPE 4 : // //
+### ETAPE 4 : C'est parti, vous pouvez tester !!!!
 
+- Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
+- NB : Assurez-vous d'avoir accès à internet pour un bon affichage de la page.
 
 
 
