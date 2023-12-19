@@ -48,7 +48,7 @@ Copier tout le contenu de ce repertoire pour le deposer dans le repertoire ``\AP
 ### ETAPE 4 : // //
 
 
-## METHODE3 AVEC DOCKER
+## Approche d'installation 3 - Image Docker
 
 ### ETAPE 1 : Installation de l'application Docker
 Il faut avoir impérativement Docker sur sa machine. Vous pourrez l'installer via le lien suivant : ``https://www.docker.com/products/docker-desktop/``. Il faudra activer la virtualisation sur votre ordinateur avant l'installation de ``Docker Desktop``.
@@ -60,7 +60,7 @@ Il faut avoir impérativement Docker sur sa machine. Vous pourrez l'installer vi
 3. Ensuite exécuter la commande suivante pour construire l'image : ``docker-compose build``
 4. Ensuite exécuter la commande suivante pour lancer le conteneur : ``docker-compose up``
 
-### ETAPE 4 : C'est parti, vous pouvez tester !!!!
+### ETAPE 3 : C'est parti, vous pouvez tester !!!!
 
 Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
 NB : Assurez-vous d'avoir accès à internet pour un bon affichage de la page.
