@@ -49,13 +49,14 @@ Copier tout le contenu de ce répertoire pour le déposer dans le répertoire ``
 
 1. En premier, il faudra démarrer l'application ``Docker Desktop`` sur votre machine.
 2. Ouvrez votre invite de commande, positionnez-vous dans le répertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert`` de votre dépôt local.
-3. Ensuite exécuter la commande suivante pour construire l'image : ``docker-compose build``
-4. Ensuite exécuter la commande suivante pour lancer le conteneur : ``docker-compose up``
+3. Ensuite exécuter la commande suivante pour créer l'image et lancer le conteneur : ``docker-compose up``
 
 ### ETAPE 4 : C'est parti, vous pouvez tester !!!!
 
-Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
+1. Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
 .NB : Assurez-vous d'avoir accès à internet pour un bon affichage de la page.
+
+2. BON A SAVOIR: Après ce lancement initial, pour les lancements futurs, il faudra tout simplement manipuler l'image qui a été créee à cet effet.
 
 
 
