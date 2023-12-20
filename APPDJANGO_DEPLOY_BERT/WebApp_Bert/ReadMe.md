@@ -45,14 +45,14 @@ Il faut avoir impérativement Docker sur sa machine. Vous pourrez l'installer vi
 Accédez au répertoire du lien partagé avec le mot de passe ci-dessus. 
 Copier tout le contenu de ce répertoire pour le déposer dans le répertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert\Deploy_Modele_Bert\static\Deploy_Modele_Bert`` de votre dépôt local.
 
-### ETAPE 2 : Installation de l'image Docker de l'application
+### ETAPE 3 : Installation de l'image Docker de l'application
 
 1. En premier, il faudra démarrer l'application ``Docker Desktop`` sur votre machine.
 2. Ouvrez votre invite de commande, positionnez-vous dans le répertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert`` de votre dépôt local.
 3. Ensuite exécuter la commande suivante pour construire l'image : ``docker-compose build``
 4. Ensuite exécuter la commande suivante pour lancer le conteneur : ``docker-compose up``
 
-### ETAPE 3 : C'est parti, vous pouvez tester !!!!
+### ETAPE 4 : C'est parti, vous pouvez tester !!!!
 
 Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
 .NB : Assurez-vous d'avoir accès à internet pour un bon affichage de la page.
