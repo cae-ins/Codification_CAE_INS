@@ -46,7 +46,7 @@ Il faut avoir impérativement Docker sur sa machine. Vous pourrez l'installer vi
 ### ETAPE 3 : C'est parti, vous pouvez tester !!!!
 
 Une fois que le serveur est lancé, accédez à la plateforme à travers le navigateur avec l'adresse ``http://127.0.0.1:8000``
-NB : Assurez-vous d'avoir accès à internet pour un bon affichage de la page.
+.NB : Assurez-vous d'avoir accès à internet pour un bon affichage de la page.
 
 
 
