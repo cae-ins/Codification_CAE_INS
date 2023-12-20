@@ -36,10 +36,19 @@ Copier tout le contenu de ce repertoire pour le deposer dans le repertoire ``\AP
 ### ETAPE 1 : Installation de l'application Docker
 Il faut avoir impérativement Docker sur sa machine. Vous pourrez l'installer via le lien suivant : ``https://www.docker.com/products/docker-desktop/``. Il faudra activer la virtualisation sur votre ordinateur avant l'installation de ``Docker Desktop``.
 
+### ETAPE 2: Téléchargement du fichier de poids depuis le lien ci-après
+ 
+- Lien partagé : https://gouvci-my.sharepoint.com/:f:/g/personal/cae_stat_plan_gouv_ci/EnUuEiOAcaxCpIWzOdxKVxMB_aNvkUNweq4_IdpYMcb9Bg?e=ZTqlAg
+
+- Mot de passe : ``2hb4SzA4``
+
+Accédez au répertoire du lien partagé avec le mot de passe ci-dessus. 
+Copier tout le contenu de ce répertoire pour le déposer dans le répertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert\Deploy_Modele_Bert\static\Deploy_Modele_Bert`` de votre dépôt local.
+
 ### ETAPE 2 : Installation de l'image Docker de l'application
 
 1. En premier, il faudra démarrer l'application ``Docker Desktop`` sur votre machine.
-2. Ouvrez votre invite de commande, positionnez-vous dans le repertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert`` de votre depôt local.
+2. Ouvrez votre invite de commande, positionnez-vous dans le répertoire ``\APPDJANGO_DEPLOY_BERT\WebApp_Bert`` de votre dépôt local.
 3. Ensuite exécuter la commande suivante pour construire l'image : ``docker-compose build``
 4. Ensuite exécuter la commande suivante pour lancer le conteneur : ``docker-compose up``
 
