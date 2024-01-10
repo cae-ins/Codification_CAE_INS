@@ -15,21 +15,28 @@ import io
 import tempfile
 import shutil
 from django.http import JsonResponse, HttpResponseBadRequest
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
+
+def get_csrf_token(request):
+    token = get_token(request)
+    return JsonResponse({'csrfToken': token})
 
 #Fonction pour la transformation du fichier
+@csrf_exempt
 def predict(request):
+
     
       try:  
             #L'objet contenant les critères de verification
             verificateur = VerificateurTexte()
 
             # Créer des répertoires temporaires
-            temp_dir = tempfile.mkdtemp()
-            temp_dir1 = tempfile.mkdtemp()
+            temp_dir = tempfile.mkdtemp(prefix="codif_")
 
             # Stocker les valeurs dans la session
             request.session['temp_dir'] = temp_dir
-            request.session['temp_dir1'] = temp_dir1
             
             # Emplacements où le modèle et le tokenizer ont été sauvegardés
             model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_model_runpod_distillbert')
@@ -95,23 +102,28 @@ def predict(request):
                #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
                #f_input.to_csv(transformed_file_path, sep =';', index=False)
                
-               transformed_file_path = os.path.join(temp_dir1, 'transformed_data.csv')
+               transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
                f_input.to_csv(transformed_file_path, sep=';', index=False)
 
                #Renvoyer la page pour telecharger le fichier
-               return JsonResponse({'success': 'ok'})
+               return JsonResponse({
+                  "temp_dir" : temp_dir.split("\\")[-1],
+                  "statut" : 'succes',
+                  "message" : "Traitement effectuer avec succes"
+               })
             
       except Exception as e:
           
             print("Erreur dans le fichier:", e)
             
    
-   
-#Fonction qui retourne la page d'accueil   
+
+
+#Fonction qui retourne la page d'accueil
 def index(request):
-    
+
    #Renvoyer la page pour charger le fichier
-   #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png') 
+   #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png')
    img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
    return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
 
@@ -120,15 +132,14 @@ def download_page(request):
     return render(request, 'Deploy_Modele_Bert/download_page.html')
 
 #Fonction pour le telechargement du fichier transformé
-def download_transformed_csv(request):
-
+def download_transformed_csv(request, temp_dir):
+    print(os.path.join(tempfile.gettempdir(), temp_dir))
+    temp_dir = os.path.join(tempfile.gettempdir(), temp_dir)
     # Récupérer les valeurs depuis la session
-    temp_dir = request.session.get('temp_dir')
-    temp_dir1 = request.session.get('temp_dir1')
     # Chemins vers les fichiers transformés
     #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
     guide_file_path = os.path.join(settings.MEDIA_ROOT, 'guide', 'guide.xlsx')
-    transformed_file_path = os.path.join(temp_dir1, 'transformed_data.csv')
+    transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
     #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
     errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
 
@@ -143,12 +154,9 @@ def download_transformed_csv(request):
 
     #Suppression des repertoires temporaires
     shutil.rmtree(temp_dir)
-    shutil.rmtree(temp_dir1)
 
     # Répondez avec le contenu du zip
     response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=transformed_files.zip'
 
-    return response 
-   
-    
+    return response

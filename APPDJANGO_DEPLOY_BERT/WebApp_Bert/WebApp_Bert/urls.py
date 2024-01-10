@@ -27,7 +27,10 @@ urlpatterns = [
     path('predict/', views.predict, name="predict"),
     path('', views.index),
     path('download_transformed_csv/', views.download_transformed_csv, name='download_transformed_csv'),
+    path('download_transformed_csv/<slug:temp_dir>/', views.download_transformed_csv, name='download_temp_dir'),
     path('download_page/', views.download_page, name='download_page'),
+    path('get-csrf-token/', views.get_csrf_token, name='get_csrf_token'),
+    
 
 ]
 
