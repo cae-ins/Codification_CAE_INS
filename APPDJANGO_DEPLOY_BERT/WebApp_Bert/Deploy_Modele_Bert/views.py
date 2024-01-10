@@ -55,13 +55,13 @@ def predict(request):
 
     if request.method == 'POST' and request.FILES :
       input_file = request.FILES.get("file")
-      file_content = input_file.read().decode('utf-16-le')
+      file_content = input_file.read().decode('latin-1')
 
       # Utiliser StringIO pour créer un objet fichier virtuel
       file_object = StringIO(file_content)
 
       # Lire le contenu CSV dans un DataFrame
-      f_input = pd.read_csv(file_object, sep=";", encoding="utf-16-le")
+      f_input = pd.read_csv(file_object, sep=";", encoding="latin-1")
 
       #Verification de la conformité du fichier
       # responsVerif = verification(path='/')
@@ -130,8 +130,8 @@ def index(request):
 
    #Renvoyer la page pour charger le fichier
    #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png')
-   img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
-   return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
+   #img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
+   return render(request,'index.html')
 
 #Fonction qui retourne la page de téléchargement
 def download_page(request):
