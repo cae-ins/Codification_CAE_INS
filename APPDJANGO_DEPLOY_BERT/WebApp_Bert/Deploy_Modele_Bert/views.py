@@ -7,6 +7,7 @@ from django.conf import settings
 import os
 from .mod_predict import predict_sic_code
 from .control_file import VerificateurTexte
+from .file_checker import verifier_fichier_csv
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizerFast
 import pickle
 from django.http import FileResponse
@@ -54,63 +55,76 @@ def predict(request):
             if request.method == 'POST' and request.FILES :
                
                input_file = request.FILES.get("file")
-               file_content = input_file.read().decode('latin-1')
-               
-               # Utiliser StringIO pour créer un objet fichier virtuel
-               file_object = StringIO(file_content)
-               
-               # Lire le contenu CSV dans un DataFrame
-               f_input = pd.read_csv(file_object, sep=";", encoding="latin-1")
 
-               j=-1
-               caracteres_errones = []
-               for index, row in f_input.iterrows():
-                  
-                  j+=1
-                  text = str(row['libelle'])
-                  #Condition de verification des caractères du libellé
-                  if verificateur.verifie_longueur(text) or verificateur.verifie_caractere_unique(text) or \
-                  verificateur.verifie_trois_successifs(text) or verificateur.verifie_chiffres_uniquement(text):
-                     
-                     caracteres_errones.append(text)
-                     f_input = f_input.drop(index)
+               control_file = verifier_fichier_csv(input_file)
 
-                  else:
-            
-                     # Prédiction avec le modèle et le tokenizer chargés
-                     predictions = predict_sic_code(text, model, tokenizer, label_encoder)
-                     clef =[]
-                     valeur =[]
-                     dict_pred = {}
-                     for i, (sic_code, certainty) in enumerate(predictions, 1):
-                        clef.append(sic_code)
-                        valeur.append(certainty)
-                     for cle, valeur in zip(clef, valeur):
-                        dict_pred[cle] = valeur
-                     cle_max = max(dict_pred, key=dict_pred.get)
-                     f_input.loc[j, 'Code'] = cle_max
-                     f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
-
-               #Exportation du fichier contenant des données érronées sur le serveur
-               df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
-               #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
-               #df_errone.to_csv(errone_file_path, sep =';', index=False)
-               errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
-               df_errone.to_csv(errone_file_path, sep=';', index=False)
-               
-               #Exportation du fichier contenant des données transformées sur le serveur
-               #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
-               #f_input.to_csv(transformed_file_path, sep =';', index=False)
-               
-               transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
-               f_input.to_csv(transformed_file_path, sep=';', index=False)
-
-               #Renvoyer la page pour telecharger le fichier
-               return JsonResponse({
-                  "temp_dir" : temp_dir.split("\\")[-1],
-                  "statut" : 'succes',
-                  "message" : "Traitement effectuer avec succes"
+               if(control_file['status'] == 'error'):
+                    
+                  return JsonResponse({
+                  #"temp_dir" : temp_dir.split("\\")[-1],
+                  "statut" : 'error',
+                  "message" : control_file['message']
                })
+
+               else:
+
+                  file_content = input_file.read().decode('latin-1')
+                  
+                  # Utiliser StringIO pour créer un objet fichier virtuel
+                  file_object = StringIO(file_content)
+                  
+                  # Lire le contenu CSV dans un DataFrame
+                  f_input = pd.read_csv(file_object, sep=";", encoding="latin-1")
+
+                  j=-1
+                  caracteres_errones = []
+                  for index, row in f_input.iterrows():
+                     
+                     j+=1
+                     text = str(row['libelle'])
+                     #Condition de verification des caractères du libellé
+                     if verificateur.verifie_longueur(text) or verificateur.verifie_caractere_unique(text) or \
+                     verificateur.verifie_trois_successifs(text) or verificateur.verifie_chiffres_uniquement(text):
+                        
+                        caracteres_errones.append(text)
+                        f_input = f_input.drop(index)
+
+                     else:
+               
+                        # Prédiction avec le modèle et le tokenizer chargés
+                        predictions = predict_sic_code(text, model, tokenizer, label_encoder)
+                        clef =[]
+                        valeur =[]
+                        dict_pred = {}
+                        for i, (sic_code, certainty) in enumerate(predictions, 1):
+                           clef.append(sic_code)
+                           valeur.append(certainty)
+                        for cle, valeur in zip(clef, valeur):
+                           dict_pred[cle] = valeur
+                        cle_max = max(dict_pred, key=dict_pred.get)
+                        f_input.loc[j, 'Code'] = cle_max
+                        f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
+
+                  #Exportation du fichier contenant des données érronées sur le serveur
+                  df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
+                  #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
+                  #df_errone.to_csv(errone_file_path, sep =';', index=False)
+                  errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+                  df_errone.to_csv(errone_file_path, sep=';', index=False)
+                  
+                  #Exportation du fichier contenant des données transformées sur le serveur
+                  #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
+                  #f_input.to_csv(transformed_file_path, sep =';', index=False)
+                  
+                  transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
+                  f_input.to_csv(transformed_file_path, sep=';', index=False)
+
+                  #Renvoyer la page pour telecharger le fichier
+                  return JsonResponse({
+                     "temp_dir" : temp_dir.split("\\")[-1],
+                     "statut" : 'succes',
+                     "message" : "Traitement effectuer avec succes"
+                  })
             
       except Exception as e:
           
