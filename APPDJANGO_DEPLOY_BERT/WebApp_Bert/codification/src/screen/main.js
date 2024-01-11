@@ -2,23 +2,19 @@ import '../App.css';
 import ResponsiveAppBar from '../components/Topbar';
 import FileUploader from '../components/FileUploader';
 import { useEffect } from 'react';
-import { getCSRFToken, get_transform_data_url } from '../utils/requestStore';
 import CustomizedSteppers from '../components/Stepper';
 import { useState } from 'react';
-import { Box, Button, CircularProgress, Container } from '@mui/material';
+import { Box, Button, CircularProgress, Container, IconButton, Popover, Typography } from '@mui/material';
 import { Download } from '@mui/icons-material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Cookies from 'js-cookie';
 import { API_URL } from '../utils/constants';
 import ComponentFooter from '../components/Footer';
 
 function Main() {
-  const [progressionEtapes, setProgressionEtapes] = useState(0);
+  const [progressionEtapes, setProgressionEtapes] = useState(1);
   const [downloadUrl, setDownloadUrl] = useState(null);
   console.log(`API_URL`, API_URL);
-
-  const get_token = ()=>{
-    getCSRFToken()
-  }
 
   const getUrl = () => {
     try{
@@ -51,12 +47,24 @@ function Main() {
     }
   };
 
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
   return (
     <div className='main mainContainer'>
       <ResponsiveAppBar/>
       <Container className='child' maxWidth="lg">
         <Box >
-        <CustomizedSteppers progressionEtapes={progressionEtapes}/>
+        <CustomizedSteppers progressionEtapes={progressionEtapes} />
           <div id='CID' className='FileUploaderContainer'>
             <div className='FileUploaderContainer_2'>
               <h1 className='dropezone_header'>
@@ -67,15 +75,79 @@ function Main() {
               </p>
             </div>
             {(progressionEtapes === 0) ? (
-                <FileUploader setProgressionEtapes={setProgressionEtapes} className='FileUploader'/>
+                <FileUploader setProgressionEtapes={setProgressionEtapes} progressionEtapes={progressionEtapes} className='FileUploader'/>
             ):(
               (progressionEtapes === 1) ? (
-                <div className='button_submit'>
+                <div className='circular_back_out button_submit'>
                   <CircularProgress />
+                  <div className='back_out'>
+                    <IconButton
+                      aria-owns={open ? 'mouse-over-popover' : undefined}
+                      aria-haspopup="true"
+                      onMouseEnter={handlePopoverOpen}
+                      onMouseLeave={handlePopoverClose}
+                      onClick={()=>{
+                        setProgressionEtapes(0)
+                      }}className='goBackButton' aria-label="delete" fontSize="large">
+                      <ArrowBackIcon />
+                      <Popover
+                        id="mouse-over-popover"
+                        sx={{
+                          pointerEvents: 'none',
+                        }}
+                        open={open}
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left',
+                        }}
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'left',
+                        }}
+                        onClose={handlePopoverClose}
+                        disableRestoreFocus
+                      >
+                        <Typography sx={{ p: 1 }}>Retour a uploader fichier.</Typography>
+                      </Popover>
+                    </IconButton>
+                    <Button variant="outlined" color="error">
+                      Annuler
+                    </Button>
+                  </div>  
                 </div>
             ):(
               <div className='button_submit'>
-        
+                  <IconButton
+                    aria-owns={open ? 'mouse-over-popover' : undefined}
+                    aria-haspopup="true"
+                    onMouseEnter={handlePopoverOpen}
+                    onMouseLeave={handlePopoverClose}
+                    onClick={()=>{
+                      setProgressionEtapes(0)
+                    }}className='goBackButton' aria-label="delete" fontSize="large">
+                    <ArrowBackIcon />
+                    <Popover
+                      id="mouse-over-popover"
+                      sx={{
+                        pointerEvents: 'none',
+                      }}
+                      open={open}
+                      anchorEl={anchorEl}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                      }}
+                      onClose={handlePopoverClose}
+                      disableRestoreFocus
+                    >
+                      <Typography sx={{ p: 1 }}>Retour a uploader fichier.</Typography>
+                    </Popover>
+                  </IconButton>
                   <Button
                     component="label"
                     onClick={handleDownloadClick}
@@ -89,7 +161,6 @@ function Main() {
               </div>
             )
             )}
-            
           </div>
         </Box>
       </Container>

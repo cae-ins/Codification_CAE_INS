@@ -5,7 +5,7 @@ import { get_transform_data, submitFile } from '../utils/requestStore';
 import Cookies from 'js-cookie';
 import { Send } from '@mui/icons-material';
 
-const FileUploader = ({setProgressionEtapes}) => {
+const FileUploader = ({setProgressionEtapes, progressionEtapes}) => {
     
   const [selectedFiles, setSelectedFiles] = useState([]);
 
@@ -26,6 +26,7 @@ const FileUploader = ({setProgressionEtapes}) => {
     setProgressionEtapes(1)
     submitFile(selectedFiles[0].file)
     .then((data)=>{
+      if(progressionEtapes === 1)
         if(data.statut === "succes" && data.temp_dir){
             Cookies.set('codif_result_dir', data.temp_dir);
             setProgressionEtapes(2)
