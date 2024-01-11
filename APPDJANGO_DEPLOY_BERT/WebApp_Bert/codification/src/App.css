@@ -25,6 +25,7 @@
 
   #CID .dropzone_p{
     margin: 0;
+    margin-top: 5px;
   }
 
 .FileUploaderContainer
@@ -96,7 +97,25 @@
   .FileUploaderContainer h1.dropzone_header {
     height: var(--dropzone3-height);
     line-height: var(--dropzone3-height);
+  }
+  .footer{
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    --tw-text-opacity: 1;
+    color: rgb(107 114 128/var(--tw-text-opacity));
+    margin-top: 40px;
+  }
+
 }
+
+@media (min-width: 0px) and (max-width: 553px)
+{
+  .footer span{
+    display: none;
+  }
+
 }
 
 
@@ -150,4 +169,37 @@
   to {
     transform: rotate(360deg);
   }
+}
+html, body, #root, .main{
+  height: 100%;
+}
+
+.footer{
+  display: flex;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128/var(--tw-text-opacity));
+  margin-top: 40px;
+}
+
+
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.child {
+  flex: 1;
+  min-width: 0; /* Permet à l'élément de réduire sa taille au minimum si nécessaire */
+}
+
+.child:first-child,
+.child:last-child {
+  flex: 0; /* Fixe la taille du premier et du dernier enfant en utilisant la taille du contenu */
 }

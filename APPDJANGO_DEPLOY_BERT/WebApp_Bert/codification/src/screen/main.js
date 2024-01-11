@@ -8,11 +8,13 @@ import { useState } from 'react';
 import { Box, Button, CircularProgress, Container } from '@mui/material';
 import { Download } from '@mui/icons-material';
 import Cookies from 'js-cookie';
+import { API_URL } from '../utils/constants';
+import ComponentFooter from '../components/Footer';
 
 function Main() {
   const [progressionEtapes, setProgressionEtapes] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState(null);
-  console.log(`progressionEtapes`, progressionEtapes);
+  console.log(`API_URL`, API_URL);
 
   const get_token = ()=>{
     getCSRFToken()
@@ -21,7 +23,7 @@ function Main() {
   const getUrl = () => {
     try{
       const codif_result_dir = Cookies.get('codif_result_dir');
-      setDownloadUrl('http://localhost:8000/download_transformed_csv/'+codif_result_dir+'/')
+      setDownloadUrl(API_URL+'download_transformed_csv/'+codif_result_dir+'/')
       console.log(downloadUrl);
     }catch (error) {
       console.error('Erreur lors de la récupération du lien : ', error);
@@ -50,9 +52,9 @@ function Main() {
   };
 
   return (
-    <div className='main'>
+    <div className='main mainContainer'>
       <ResponsiveAppBar/>
-      <Container maxWidth="lg">
+      <Container className='child' maxWidth="lg">
         <Box >
         <CustomizedSteppers progressionEtapes={progressionEtapes}/>
           <div id='CID' className='FileUploaderContainer'>
@@ -91,7 +93,7 @@ function Main() {
           </div>
         </Box>
       </Container>
-      
+      <ComponentFooter/>
     </div>
   );
 }
