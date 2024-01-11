@@ -124,8 +124,8 @@ def index(request):
 
    #Renvoyer la page pour charger le fichier
    #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png')
-   img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
-   return render(request,'Deploy_Modele_Bert/page_loading.html', {'img_path': img_path})
+   #img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
+   return render(request,'index.html')
 
 #Fonction qui retourne la page de téléchargement
 def download_page(request):

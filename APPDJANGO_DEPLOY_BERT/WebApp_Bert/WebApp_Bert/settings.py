@@ -58,7 +58,7 @@ ROOT_URLCONF = 'WebApp_Bert.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'codification', 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -132,6 +132,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'Deploy_Modele_Bert','static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'Deploy_Modele_Bert','static'), os.path.join(BASE_DIR, 'codification', 'build', 'static')]
 
 CORS_ORIGIN_ALLOW_ALL = True
