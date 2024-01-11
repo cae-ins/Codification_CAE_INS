@@ -165,7 +165,7 @@ const steps = ['Uploader', 'Traitement', 'Télecharger'];
 
 export default function CustomizedSteppers({progressionEtapes}) {
   return (
-    <Stack sx={{ width: '100%', marginTop: '20px' }} spacing={4}>
+    <Stack sx={{ width: '100%', marginTop: '5px' }} spacing={4}>
       {/* <Stepper alternativeLabel activeStep={1} connector={<QontoConnector />}>
         {steps.map((label) => (
           <Step key={label}>

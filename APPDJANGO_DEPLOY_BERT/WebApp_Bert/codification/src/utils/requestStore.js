@@ -78,18 +78,14 @@ export const submitFile = async (file) =>{
     }
   }
 
-  export const get_transform_data = async () => {
+  export const get_transform_data_url = async () => {
     
     const csrfToken = Cookies.get('csrftoken');
     const codif_result_dir = Cookies.get('codif_result_dir');
-    const headers = {
-        'X-CSRFToken': csrfToken, // Ajouter le CSRF token dans l'en-tête
-      }
     try {
-      const response = await axios.get(API_URL + 'download_transformed_csv/'+codif_result_dir+'/', {headers});
-      debugger
-      console.log(`response`, response);
+      return API_URL + 'download_transformed_csv/'+codif_result_dir+'/'
     } catch (error) {
       console.error('Erreur lors de la récupération du CSRF token : ', error);
+      return '#'
     }
   };

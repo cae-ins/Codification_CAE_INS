@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { get_transform_data, submitFile } from '../utils/requestStore';
 import Cookies from 'js-cookie';
+import { Send } from '@mui/icons-material';
 
 const FileUploader = ({setProgressionEtapes}) => {
     
@@ -27,7 +28,7 @@ const FileUploader = ({setProgressionEtapes}) => {
     .then((data)=>{
         if(data.statut === "succes" && data.temp_dir){
             Cookies.set('codif_result_dir', data.temp_dir);
-            setProgressionEtapes(3)
+            setProgressionEtapes(2)
         }
     })
   }
@@ -38,7 +39,7 @@ const FileUploader = ({setProgressionEtapes}) => {
   });
 
   return (
-    <div>
+    <div className='FileUploaderContainer_field'>
         <div {...getRootProps()} className='FileUploader' style={dropzoneStyles}>
             <input {...getInputProps()} />
             {
@@ -61,7 +62,9 @@ const FileUploader = ({setProgressionEtapes}) => {
                 </div>
             </div>
         )}
-        <Button disabled={selectedFiles.length === 0} variant="contained" onClick={submitFiles}>Codifier</Button>
+        <div className='button_submit'>
+        <Button disabled={selectedFiles.length === 0} variant="contained" onClick={submitFiles}  startIcon={<Send />}>Codifier</Button>
+        </div>
     </div>
   );
 };
