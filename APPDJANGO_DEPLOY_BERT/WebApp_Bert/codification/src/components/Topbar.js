@@ -12,7 +12,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#36ac36',
+      main: '#009E60',
       light: '#E9DB5D',
       dark: '#A29415',
       contrastText: '#242105',
@@ -48,7 +48,7 @@ function ResponsiveAppBar() {
 
   return (
     <ThemeProvider theme={theme}>
-    <AppBar color='primary' className='topbar'  position="static">
+    <AppBar color='primary' className='topbar child'  position="static">
       <Container  maxWidth="xl">
         <Toolbar  disableGutters>
           {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
