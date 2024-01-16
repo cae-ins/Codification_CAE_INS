@@ -67,6 +67,7 @@ def predict(request):
                })
 
                else:
+                  input_file.seek(0)
 
                   file_content = input_file.read().decode('latin-1')
                   
@@ -167,7 +168,7 @@ def download_transformed_csv(request, temp_dir):
 
 
     #Suppression des repertoires temporaires
-    shutil.rmtree(temp_dir)
+    #shutil.rmtree(temp_dir)
 
     # Répondez avec le contenu du zip
     response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')

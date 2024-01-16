@@ -10,9 +10,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Cookies from 'js-cookie';
 import { API_URL } from '../utils/constants';
 import ComponentFooter from '../components/Footer';
+import { cancelUpload } from '../utils/requestStore';
 
 function Main() {
-  const [progressionEtapes, setProgressionEtapes] = useState(1);
+  const [progressionEtapes, setProgressionEtapes] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState(null);
   console.log(`API_URL`, API_URL);
 
@@ -57,6 +58,11 @@ function Main() {
     setAnchorEl(null);
   };
 
+  const cancelRequest = ()=>{
+    cancelUpload()
+    setProgressionEtapes(0)
+  }
+
   const open = Boolean(anchorEl);
 
   return (
@@ -81,37 +87,7 @@ function Main() {
                 <div className='circular_back_out button_submit'>
                   <CircularProgress />
                   <div className='back_out'>
-                    <IconButton
-                      aria-owns={open ? 'mouse-over-popover' : undefined}
-                      aria-haspopup="true"
-                      onMouseEnter={handlePopoverOpen}
-                      onMouseLeave={handlePopoverClose}
-                      onClick={()=>{
-                        setProgressionEtapes(0)
-                      }}className='goBackButton' aria-label="delete" fontSize="large">
-                      <ArrowBackIcon />
-                      <Popover
-                        id="mouse-over-popover"
-                        sx={{
-                          pointerEvents: 'none',
-                        }}
-                        open={open}
-                        anchorEl={anchorEl}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left',
-                        }}
-                        transformOrigin={{
-                          vertical: 'top',
-                          horizontal: 'left',
-                        }}
-                        onClose={handlePopoverClose}
-                        disableRestoreFocus
-                      >
-                        <Typography sx={{ p: 1 }}>Retour a uploader fichier.</Typography>
-                      </Popover>
-                    </IconButton>
-                    <Button variant="outlined" color="error">
+                    <Button variant="outlined" color="error" onClick={cancelRequest}>
                       Annuler
                     </Button>
                   </div>  

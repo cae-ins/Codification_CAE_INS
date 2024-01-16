@@ -26,11 +26,14 @@ const FileUploader = ({setProgressionEtapes, progressionEtapes}) => {
     setProgressionEtapes(1)
     submitFile(selectedFiles[0].file)
     .then((data)=>{
-      if(progressionEtapes === 1)
-        if(data.statut === "succes" && data.temp_dir){
-            Cookies.set('codif_result_dir', data.temp_dir);
-            setProgressionEtapes(2)
-        }
+      console.log(data);
+      if(data.statut === "succes" && data.temp_dir){
+        Cookies.set('codif_result_dir', data.temp_dir);
+        setProgressionEtapes(2)
+      }
+    })
+    .catch((errors) => {
+
     })
   }
 
