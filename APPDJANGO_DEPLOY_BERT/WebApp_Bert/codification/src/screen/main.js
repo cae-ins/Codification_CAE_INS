@@ -11,6 +11,7 @@ import Cookies from 'js-cookie';
 import { API_URL } from '../utils/constants';
 import ComponentFooter from '../components/Footer';
 import { cancelUpload } from '../utils/requestStore';
+import ChoixModelNiveau from '../components/ChoixModelNiveau';
 
 function Main() {
   const [progressionEtapes, setProgressionEtapes] = useState(0);
@@ -81,8 +82,12 @@ function Main() {
               </p>
             </div>
             {(progressionEtapes === 0) ? (
+              <div>
+                {/* <ChoixModelNiveau/> */}
                 <FileUploader setProgressionEtapes={setProgressionEtapes} progressionEtapes={progressionEtapes} className='FileUploader'/>
-            ):(
+            
+              </div>
+                ):(
               (progressionEtapes === 1) ? (
                 <div className='circular_back_out button_submit'>
                   <CircularProgress />

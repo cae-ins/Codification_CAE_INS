@@ -19,6 +19,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+import json
 
 def get_csrf_token(request):
     token = get_token(request)
@@ -141,6 +142,16 @@ def index(request):
    #img_path = os.path.join(settings.MEDIA_ROOT,'images','logo-ins.png')
    #img_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'images','logo-ins.png')
    return render(request,'index.html')
+
+def get_models_details(request):
+   with open(os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'config.json'), 'r') as fichier_json:
+      data = json.load(fichier_json)
+   
+   print(data)
+
+   return JsonResponse({
+      "data" : data
+   })
 
 #Fonction qui retourne la page de téléchargement
 def download_page(request):
