@@ -10,7 +10,7 @@ def verifier_fichier_csv(file):
 
         return {
             'status':'error' ,
-            'message': 'Erreur : Le fichier n\'est pas un fichier CSV.'
+            'message': 'Le fichier n\'est pas un fichier CSV.'
         }
     
     # Lire le fichier comme un DataFrame
@@ -29,7 +29,7 @@ def verifier_fichier_csv(file):
 
         return {
             'status':'error' ,
-            'message': 'Erreur : Le fichier CSV est vide.'
+            'message': 'Le fichier CSV est vide.'
             }
 
     # Vérifier le nombre de colonnes
@@ -37,14 +37,14 @@ def verifier_fichier_csv(file):
 
         return {
             'status':'error' ,
-            'message': 'Erreur : Le fichier CSV doit avoir exactement une colonne.'
+            'message': 'Le fichier CSV doit avoir exactement une colonne.'
             }
 
     # Vérifier si le nom de la colonne est "libelle"
     if df.columns[0].lower() != 'libelle':
         return {
             'status':'error',
-            'message': 'Erreur : Le nom de la colonne doit être \'libelle\'.'
+            'message': 'Le nom de la colonne doit être \'libelle\'.'
             }
 
     # Si toutes les vérifications passent, le fichier peut être traité

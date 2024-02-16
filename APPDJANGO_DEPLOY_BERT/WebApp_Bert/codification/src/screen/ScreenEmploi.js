@@ -13,7 +13,7 @@ import ComponentFooter from '../components/Footer';
 import { cancelUpload } from '../utils/requestStore';
 import ChoixModelNiveau from '../components/ChoixModelNiveau';
 
-function Main() {
+function Home() {
   const [progressionEtapes, setProgressionEtapes] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState(null);
   console.log(`API_URL`, API_URL);
@@ -73,17 +73,17 @@ function Main() {
         <Box >
         <CustomizedSteppers progressionEtapes={progressionEtapes} />
           <div id='CID' className='FileUploaderContainer'>
-            <div className='FileUploaderContainer_2'>
+            {/* <div className='FileUploaderContainer_2'>
               <h1 className='dropezone_header'>
                 Codification des emplois
               </h1>
               <p className='dropzone_p'>
               Uploader votre fichier et laissez notre algorithme puissant attribuer à chaque emploi la codification CITP. Simplifiez le processus de classification des postes en quelques clics.
               </p>
-            </div>
+            </div> */}
             {(progressionEtapes === 0) ? (
               <div>
-                {/* <ChoixModelNiveau/> */}
+                { <ChoixModelNiveau/> }
                 <FileUploader setProgressionEtapes={setProgressionEtapes} progressionEtapes={progressionEtapes} className='FileUploader'/>
             
               </div>
@@ -150,4 +150,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default Home;

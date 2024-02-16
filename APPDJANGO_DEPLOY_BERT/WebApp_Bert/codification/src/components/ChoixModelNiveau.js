@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const data = {
   "MODEL 1": {
     "name": "codification emploi",
-    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit maxime eveniet perspiciatis numquam nulla atque illum distinctio aperiam. Architecto unde sunt quia mollitia perferendis dolor odit, assumenda iste obcaecati et.",
+    "description": "Uploader votre fichier et laissez notre algorithme puissant attribuer à chaque emploi la codification CITP. Simplifiez le processus de classification des postes en quelques clics.",
     "niveaux": {
       "1": "Grands groupes",
       "2": "Sous-groupes principaux",
@@ -13,8 +13,8 @@ const data = {
     }
   },
   "MODEL 2": {
-    "name": "codification emploi",
-    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit maxime eveniet perspiciatis numquam nulla atque illum distinctio aperiam. Architecto unde sunt quia mollitia perferendis dolor odit, assumenda iste obcaecati et.",
+    "name": "codification metier",
+    "description": "Uploader votre fichier et laissez notre algorithme puissant attribuer à chaque metier la codification CITP. Simplifiez le processus de classification des postes en quelques clics.",
     "niveaux": {
       "1": "Grands groupes",
       "2": "Sous-groupes principaux",
@@ -48,8 +48,6 @@ const ChoixModelNiveau = () => {
         ))}
       </select>
 
-      <br />
-
       <label>Choisissez un niveau:</label>
       <select value={selectedNiveau} onChange={handleNiveauChange}>
         {Object.keys(data[selectedModel].niveaux).map(niveau => (
@@ -57,12 +55,15 @@ const ChoixModelNiveau = () => {
         ))}
       </select>
 
-      <br />
-
-      <div>
-        <h3>{data[selectedModel].name}</h3>
-        <p>{data[selectedModel].description}</p>
-        <p>Niveau sélectionné: {data[selectedModel].niveaux[selectedNiveau]}</p>
+      <div id='CID' className='FileUploaderContainer'>
+            <div className='FileUploaderContainer_2'>
+              <h1 className='dropezone_header'>
+              {data[selectedModel].name} / {data[selectedModel].niveaux[selectedNiveau]}
+              </h1>
+              <p className='dropzone_p'>
+              {data[selectedModel].description}
+              </p>
+            </div>
       </div>
     </div>
   );
