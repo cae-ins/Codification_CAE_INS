@@ -77,8 +77,23 @@ function Home({ model }) {
   const [modalTitle, setModalTitle] = useState("Title");
   const [modalMessage, setModalMessage] = useState("Aucun message");
 
+
+
+  const [openPreview, setOpenPreview] = useState(false);
+  const [dialogContent, setDialogContent] = useState();
+
+  
+
   const handleClickOpen = () => {
     setOpen(true);
+  };
+
+  const handleClickOpenPreview = () => {
+    setOpenPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setOpenPreview(false);
   };
 
   const handleClose = () => {
@@ -90,6 +105,12 @@ function Home({ model }) {
     setModalTitle(title)
     setModalMessage(msg)
     handleClickOpen()
+  }
+
+  const showPreview = (contentElement, title) => {
+    setModalTitle(title)
+    setDialogContent(contentElement)
+    handleClickOpenPreview()
   }
 
   return (
@@ -125,10 +146,29 @@ function Home({ model }) {
                 {/* <Button onClick={handleClose} autoFocus>Agree</Button> */}
               </DialogActions>
             </Dialog>
+
+            <Dialog
+              open={openPreview}
+              onClose={handleClosePreview}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+              maxWidth="lg"
+            >
+              <DialogTitle id="alert-dialog-title">
+                {modalTitle}
+              </DialogTitle>
+              <DialogContent>
+                  {dialogContent}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClosePreview}>Fermer</Button>
+                {/* <Button onClick={handleClose} autoFocus>Agree</Button> */}
+              </DialogActions>
+            </Dialog>
             {(progressionEtapes === 0) ? (
               <div>
                 {/* { <ChoixModelNiveau/> } */}
-                <FileUploader setProgressionEtapes={setProgressionEtapes} showError={showError} className='FileUploader'/>
+                <FileUploader setProgressionEtapes={setProgressionEtapes} showError={showError} showPreview={showPreview} className='FileUploader'/>
             
               </div>
                 ):(

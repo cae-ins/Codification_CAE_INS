@@ -161,6 +161,7 @@ def download_page(request):
 def download_transformed_csv(request, temp_dir):
     print(os.path.join(tempfile.gettempdir(), temp_dir))
     temp_dir = os.path.join(tempfile.gettempdir(), temp_dir)
+    print(temp_dir)
     # Récupérer les valeurs depuis la session
     # Chemins vers les fichiers transformés
     #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
