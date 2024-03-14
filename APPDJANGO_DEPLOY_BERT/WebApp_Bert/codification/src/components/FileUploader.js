@@ -133,8 +133,8 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview}) => {
   }
 
   const submitFiles = () =>{
-    setProgressionEtapes(1)
-    submitFile(selectedFiles[0].file)
+    //setProgressionEtapes(1)
+    submitFile(selectedFiles)
     .then((data)=>{
       console.log(data);
       if(data.statut === "succes" && data.temp_dir){

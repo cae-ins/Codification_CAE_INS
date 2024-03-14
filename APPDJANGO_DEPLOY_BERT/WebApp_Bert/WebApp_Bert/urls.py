@@ -34,6 +34,7 @@ urlpatterns = [
     path('download_page/', views.download_page, name='download_page'),
     path('get-csrf-token/', views.get_csrf_token, name='get_csrf_token'),
     path('get-models-details/', views.get_models_details, name='get_models_details'),
+    path('upload/', views.UploadFiles.as_view(), name='upload-files'),
     
 
 ]

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django.contrib.staticfiles',
     'Deploy_Modele_Bert',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

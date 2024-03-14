@@ -22,11 +22,21 @@ export const getCSRFToken = async () => {
   }
 };
 
-export const submitFile = async (file) =>{
+export const submitFile = async (selectedFilesData) =>{
   try {
     const formData = new FormData();
     // Ajouter le fichier à envoyer dans le FormData
-    formData.append('file', file);
+    var details = []
+    selectedFilesData.forEach((item, index) => {
+      formData.append(`file${index + 1}`, item.file);
+      details.push({
+        index: `file${index + 1}`,
+        name: item.name,
+        colonne : item.selectedColonne,
+        niveau : item.niveau_codification,
+      })
+    });
+    formData.append("data_details", JSON.stringify(details))
     // Récupérer le CSRF token depuis le cookie
     const csrfToken = Cookies.get('csrftoken');
     
@@ -35,7 +45,8 @@ export const submitFile = async (file) =>{
       'Content-Type': 'multipart/form-data',
     };
 
-    const response = await axios.post(API_URL + 'predict/', formData, {
+    //const response = await axios.post(API_URL + 'predict/', formData, {
+    const response = await axios.post(API_URL + 'upload/', formData, {
       headers,
       cancelToken: cancelTokenSource.token, // Utiliser le token d'annulation
     });

@@ -21,15 +21,144 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import json
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
 def get_csrf_token(request):
     token = get_token(request)
     return JsonResponse({'csrfToken': token})
 
+class UploadFiles(APIView):
+   def post(self, request, format=None):
+      data_details = request.data.get('data_details')
+
+      data = []
+
+      if data_details : 
+         details = json.loads(data_details)
+         for detail in details:
+               detail["file"] = request.FILES.get(detail["index"])
+               data.append(detail)
+
+      # Data ok pour codif
+
+         
+      # Créer des répertoires temporaires
+      temp_dir = tempfile.mkdtemp(prefix="codif_")
+
+      print(temp_dir)
+
+      for item in data:
+         codif(item["niveau"], item["colonne"], temp_dir, item["file"])
+
+      print(data)
+                
+        
+      # Traitez les fichiers ici (par exemple, enregistrer dans la base de données ou effectuer un traitement)
+      
+      return Response("Fichiers téléchargés avec succès.", status=status.HTTP_201_CREATED)
+
+
+def codif(niv, col, temp_dir, file):
+ 
+      try:  
+            #L'objet contenant les critères de verification
+            verificateur = VerificateurTexte()
+            
+            # Emplacements où le modèle et le tokenizer ont été sauvegardés
+            model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_model_runpod_distillbert')
+            tokenizer_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_tokenizer_runpod_distillbert')
+            label_encoder_load_path =  os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'label_encoder_runpod_distill_bert.pkl')
+
+            with open(label_encoder_load_path, "rb") as f:
+               label_encoder = pickle.load(f)
+
+            # Charger le modèle DistilBERT
+            model = DistilBertForSequenceClassification.from_pretrained(model_load_path)
+            # Charger le tokenizer associé
+            tokenizer = DistilBertTokenizerFast.from_pretrained(tokenizer_load_path)
+               
+            input_file = file
+
+            control_file = verifier_fichier_csv(input_file)
+
+            if(control_file['status'] == 'error'):
+                  
+               return JsonResponse({
+               #"temp_dir" : temp_dir.split("\\")[-1],
+               "statut" : 'error',
+               "message" : control_file['message']
+            })
+
+            else:
+               input_file.seek(0)
+
+               file_content = input_file.read().decode('latin-1')
+               
+               # Utiliser StringIO pour créer un objet fichier virtuel
+               file_object = StringIO(file_content)
+               
+               # Lire le contenu CSV dans un DataFrame
+               f_input = pd.read_csv(file_object, sep=";", encoding="latin-1")
+
+               j=-1
+               caracteres_errones = []
+               for index, row in f_input.iterrows():
+                  
+                  j+=1
+                  text = str(row['libelle'])
+                  #Condition de verification des caractères du libellé
+                  if verificateur.verifie_longueur(text) or verificateur.verifie_caractere_unique(text) or \
+                  verificateur.verifie_trois_successifs(text) or verificateur.verifie_chiffres_uniquement(text):
+                     
+                     caracteres_errones.append(text)
+                     f_input = f_input.drop(index)
+
+                  else:
+            
+                     # Prédiction avec le modèle et le tokenizer chargés
+                     predictions = predict_sic_code(text, model, tokenizer, label_encoder)
+                     clef =[]
+                     valeur =[]
+                     dict_pred = {}
+                     for i, (sic_code, certainty) in enumerate(predictions, 1):
+                        clef.append(sic_code)
+                        valeur.append(certainty)
+                     for cle, valeur in zip(clef, valeur):
+                        dict_pred[cle] = valeur
+                     cle_max = max(dict_pred, key=dict_pred.get)
+                     f_input.loc[j, 'Code'] = cle_max
+                     f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
+
+               #Exportation du fichier contenant des données érronées sur le serveur
+               df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
+               #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
+               #df_errone.to_csv(errone_file_path, sep =';', index=False)
+               errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+               df_errone.to_csv(errone_file_path, sep=';', index=False)
+               
+               #Exportation du fichier contenant des données transformées sur le serveur
+               #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
+               #f_input.to_csv(transformed_file_path, sep =';', index=False)
+               
+               transformed_file_path = os.path.join(temp_dir, 'transformed_data'+ file["name"] +'.csv')
+               f_input.to_csv(transformed_file_path, sep=';', index=False)
+
+               #Renvoyer la page pour telecharger le fichier
+               return {
+                  "temp_dir" : temp_dir.split("\\")[-1],
+                  "statut" : 'succes'
+               }
+         
+      except Exception as e:
+          
+            print("Erreur dans le fichier:", e)
+
 #Fonction pour la transformation du fichier
 @csrf_exempt
 def predict(request):
-
-    
+ 
       try:  
             #L'objet contenant les critères de verification
             verificateur = VerificateurTexte()
