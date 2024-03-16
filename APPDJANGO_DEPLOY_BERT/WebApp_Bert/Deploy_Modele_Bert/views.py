@@ -14,11 +14,9 @@ from django.http import FileResponse
 import zipfile
 import io
 import tempfile
-import shutil
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime
 import json
 
 from rest_framework.views import APIView
@@ -32,32 +30,36 @@ def get_csrf_token(request):
 class UploadFiles(APIView):
    def post(self, request, format=None):
       data_details = request.data.get('data_details')
-
       data = []
 
-      if data_details : 
+      if data_details:
          details = json.loads(data_details)
          for detail in details:
-               detail["file"] = request.FILES.get(detail["index"])
-               data.append(detail)
+               print(detail)
+               file_index = detail.get("index")
+               uploaded_file = request.FILES.get(file_index)
+               if uploaded_file:
+                  detail["file"] = uploaded_file
+                  data.append(detail)
+               else:
+                  return JsonResponse({
+                     "statut" : 'error',
+                     "message" : "Fichier manquant pour l'index {}".format(detail.get("name")),
+                  } , status=status.HTTP_400_BAD_REQUEST)
 
-      # Data ok pour codif
-
-         
       # Créer des répertoires temporaires
       temp_dir = tempfile.mkdtemp(prefix="codif_")
-
       print(temp_dir)
 
       for item in data:
-         codif(item["niveau"], item["colonne"], temp_dir, item["file"])
+         codif(item["niveau"], item["colonne"], temp_dir, item.get("file"))
 
-      print(data)
-                
-        
-      # Traitez les fichiers ici (par exemple, enregistrer dans la base de données ou effectuer un traitement)
       
-      return Response("Fichiers téléchargés avec succès.", status=status.HTTP_201_CREATED)
+      return JsonResponse({
+         "temp_dir" : temp_dir.split("\\")[-1],
+         "statut" : 'succes',
+         "message" : "Traitement effectuer avec succes"
+      }, status=status.HTTP_201_CREATED)
 
 
 def codif(niv, col, temp_dir, file):
@@ -135,14 +137,14 @@ def codif(niv, col, temp_dir, file):
                df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
                #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
                #df_errone.to_csv(errone_file_path, sep =';', index=False)
-               errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+               errone_file_path = os.path.join(temp_dir, 'errone_data_' + file.name +'.csv')
                df_errone.to_csv(errone_file_path, sep=';', index=False)
                
                #Exportation du fichier contenant des données transformées sur le serveur
                #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
                #f_input.to_csv(transformed_file_path, sep =';', index=False)
                
-               transformed_file_path = os.path.join(temp_dir, 'transformed_data'+ file["name"] +'.csv')
+               transformed_file_path = os.path.join(temp_dir, 'transformed_data_'+ file.name +'.csv')
                f_input.to_csv(transformed_file_path, sep=';', index=False)
 
                #Renvoyer la page pour telecharger le fichier
@@ -295,16 +297,21 @@ def download_transformed_csv(request, temp_dir):
     # Chemins vers les fichiers transformés
     #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
     guide_file_path = os.path.join(settings.MEDIA_ROOT, 'guide', 'guide.xlsx')
-    transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
+    #transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
     #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
-    errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+    #errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+
+    # Récupérer la liste des fichiers dans le dossier temporaire
+    file_names = os.listdir(temp_dir)
 
     # Créez un objet Zip
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
         # Ajoutez les fichiers au zip
-        zip_file.write(transformed_file_path, arcname='transformed_data.csv')
-        zip_file.write(errone_file_path, arcname='errone_data.csv')
+                # Ajoutez tous les fichiers au zip
+        for file_name in file_names:
+            file_path = os.path.join(temp_dir, file_name)
+            zip_file.write(file_path, arcname=file_name)
         zip_file.write(guide_file_path, arcname='guide.xlsx')
 
 
