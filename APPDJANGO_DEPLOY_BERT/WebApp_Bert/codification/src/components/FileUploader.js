@@ -133,7 +133,7 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview}) => {
   }
 
   const submitFiles = () =>{
-    //setProgressionEtapes(1)
+    setProgressionEtapes(1)
     submitFile(selectedFiles)
     .then((data)=>{
       console.log(data);

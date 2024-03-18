@@ -130,6 +130,7 @@ def codif(niv, col, temp_dir, file):
                      for cle, valeur in zip(clef, valeur):
                         dict_pred[cle] = valeur
                      cle_max = max(dict_pred, key=dict_pred.get)
+                     print(cle_max)
                      f_input.loc[j, 'Code'] = cle_max
                      f_input.loc[j, 'Vraisemblance'] = dict_pred[cle_max]
 
