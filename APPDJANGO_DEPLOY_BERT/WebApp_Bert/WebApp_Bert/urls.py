@@ -26,10 +26,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('predict/', views.predict, name="predict"),
     path('', views.index),
+    path('emplois/', views.index),
+    path('products/', views.index),
+    path('activites/', views.index),
     path('download_transformed_csv/', views.download_transformed_csv, name='download_transformed_csv'),
     path('download_transformed_csv/<slug:temp_dir>/', views.download_transformed_csv, name='download_temp_dir'),
     path('download_page/', views.download_page, name='download_page'),
     path('get-csrf-token/', views.get_csrf_token, name='get_csrf_token'),
+    path('get-models-details/', views.get_models_details, name='get_models_details'),
+    path('upload/', views.UploadFiles.as_view(), name='upload-files'),
     
 
 ]

@@ -8,8 +8,10 @@ def verifier_fichier_csv(file):
     # Vérifier si le fichier est d'extension CSV
     if not file.name.endswith('.csv'):
 
-        return JsonResponse({'status':'error' ,
-                             'message': 'Erreur : Le fichier n\'est pas un fichier CSV.'})
+        return {
+            'status':'error' ,
+            'message': 'Le fichier n\'est pas un fichier CSV.'
+        }
     
     # Lire le fichier comme un DataFrame
     try:
@@ -25,22 +27,30 @@ def verifier_fichier_csv(file):
 
     except pd.errors.EmptyDataError:
 
-        return JsonResponse({'status':'error' ,
-                             'message': 'Erreur : Le fichier CSV est vide.'})
+        return {
+            'status':'error' ,
+            'message': 'Le fichier CSV est vide.'
+            }
 
     # Vérifier le nombre de colonnes
     if len(df.columns) != 1:
 
-        return JsonResponse({'status':'error' ,
-                             'message': 'Erreur : Le fichier CSV doit avoir exactement une colonne.'})
+        return {
+            'status':'error' ,
+            'message': 'Le fichier CSV doit avoir exactement une colonne.'
+            }
 
     # Vérifier si le nom de la colonne est "libelle"
     if df.columns[0].lower() != 'libelle':
-        return JsonResponse({'status':'error' ,
-                             'message': 'Erreur : Le nom de la colonne doit être \'libelle\'.'})
+        return {
+            'status':'error',
+            'message': 'Le nom de la colonne doit être \'libelle\'.'
+            }
 
     # Si toutes les vérifications passent, le fichier peut être traité
-    return JsonResponse({'status': 'succes',
-                         'message':'ok'})
+    return {
+        'status': 'succes',
+        'message':'ok'
+        }
 
 
