@@ -21,6 +21,7 @@ from Deploy_Modele_Bert import views
 from django.conf.urls.static import static
 from django.conf import settings
 
+
 urlpatterns = [
 
     path('admin/', admin.site.urls),
@@ -35,6 +36,8 @@ urlpatterns = [
     path('get-csrf-token/', views.get_csrf_token, name='get_csrf_token'),
     path('get-models-details/', views.get_models_details, name='get_models_details'),
     path('upload/', views.UploadFiles.as_view(), name='upload-files'),
+    path('upload/<slug:temp_dir>/', views.UploadFiles.as_view(), name='upload-files'),
+    path('stream-traitement/<slug:temp_dir>/', views.event_stream, name='stream'),
     
 
 ]

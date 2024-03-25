@@ -1,34 +1,18 @@
-import { Button, Chip, Stack } from '@mui/material';
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import { Button } from '@mui/material';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { get_transform_data, submitFile } from '../utils/requestStore';
+import { submitFile } from '../utils/requestStore';
 import Cookies from 'js-cookie';
-import { Preview, Send } from '@mui/icons-material';
+import { Send } from '@mui/icons-material';
 import Papa from 'papaparse';
 import InteractiveList from './FormulaireSelection';
+import { API_URL } from '../utils/constants';
 
 
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import FolderIcon from '@mui/icons-material/Folder';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ListItemSecondaryAction } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -38,17 +22,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
 
 function DenseTable({ colonnes, rows }) {
   return (
@@ -84,8 +57,8 @@ const Demo = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
-const FileUploader = ({setProgressionEtapes, showError, showPreview}) => {
-
+const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress}) => {
+  console.log(`FileUploader`);
   
   const [dense, setDense] = React.useState(false);
     
@@ -132,33 +105,55 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview}) => {
     showPreview(element, file.name)
   }
 
-  const submitFiles = () =>{
-    setProgressionEtapes(1)
-    submitFile(selectedFiles)
-    .then((data)=>{
-      console.log(data);
-      if(data.statut === "succes" && data.temp_dir){
-        Cookies.set('codif_result_dir', data.temp_dir);
-        setProgressionEtapes(2)
-      }else{
-        if (data.statut === "error") {
-          showError(data.statut, data.message)
-          setProgressionEtapes(0)
-        }else{
-          showError("Erreur", data.message)
-          setProgressionEtapes(0)
+  const startSSE = useCallback((temp_dir) => {
+    console.log(`test`);
+    const eventSource = new EventSource(API_URL+'stream-traitement/'+temp_dir+'/');
+    eventSource.onmessage = (event) => {
+        const eventData = JSON.parse(event.data);
+        //console.log(`eventData`, eventData);
+        if (eventData.statut == "Complete") {
+            setProgress(parseInt(eventData.progress));
+            eventSource.close();
+            setProgressionEtapes(2)
+        } else {
+            setProgress(parseInt(eventData.progress));
         }
+    };
+
+    return () => {
+         setProgress(7)
+    };
+  }, []);
+
+
+const submitFiles = useCallback(() => {
+  setProgressionEtapes(1)
+  submitFile(selectedFiles)
+  .then((data)=>{
+    if(data.statut === "succes" && data.temp_dir){
+      Cookies.set('codif_result_dir', data.temp_dir);
+      //setProgressionEtapes(2)
+      console.log(data);
+      startSSE(data.temp_dir)
+    }else{
+      if (data.statut === "error") {
+        showError(data.statut, data.message)
+        setProgressionEtapes(0)
+      }else{
+        showError("Erreur", data.message)
+        setProgressionEtapes(0)
       }
-    })
-    .catch((errors) => {
-      console.log(errors);
-      setProgressionEtapes(0)
-    })
-  }
+    }
+  })
+  .catch((errors) => {
+    console.log(errors);
+    setProgressionEtapes(0)
+  })
+}, [selectedFiles]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: 'text/csv', // Accepter uniquement les fichiers CSV
+    //accept: 'text/csv', // Accepter uniquement les fichiers CSV
   });
 
   const getColonneDetail = (file) => {

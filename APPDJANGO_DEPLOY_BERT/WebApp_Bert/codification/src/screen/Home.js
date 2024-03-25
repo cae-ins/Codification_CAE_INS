@@ -1,8 +1,6 @@
 import '../App.css';
-import Modal from '@mui/material/Modal';
-import ResponsiveAppBar from '../components/Topbar';
 import FileUploader from '../components/FileUploader';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import CustomizedSteppers from '../components/Stepper';
 import { useState } from 'react';
 import { Box, Button, CircularProgress, Container, IconButton, Popover, Typography } from '@mui/material';
@@ -10,9 +8,7 @@ import { Download } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Cookies from 'js-cookie';
 import { API_URL } from '../utils/constants';
-import ComponentFooter from '../components/Footer';
 import { cancelUpload } from '../utils/requestStore';
-import ChoixModelNiveau from '../components/ChoixModelNiveau';
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -23,26 +19,28 @@ import DialogTitle from '@mui/material/DialogTitle';
 function Home({ model }) {
   const [progressionEtapes, setProgressionEtapes] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState(null);
+  const [progress, setProgress] = useState(0);
   console.log(`API_URL`, API_URL);
 
-  const getUrl = () => {
-    try{
+  const getUrl = useCallback(() => {
+    try {
       const codif_result_dir = Cookies.get('codif_result_dir');
-      setDownloadUrl(API_URL+'download_transformed_csv/'+codif_result_dir+'/')
-      console.log(downloadUrl);
-    }catch (error) {
+      const url = API_URL + 'download_transformed_csv/' + codif_result_dir + '/';
+      setDownloadUrl(url);
+      console.log(url);
+    } catch (error) {
       console.error('Erreur lors de la récupération du lien : ', error);
-      return '#'
+      return '#';
     }
-  };
-
+  }, []);
+  
   useEffect(() => {
     console.log(Cookies.get('codif_result_dir'));
-    if (progressionEtapes === 2) {
+    if (progressionEtapes === 2 && !downloadUrl) { // Vérifiez si downloadUrl est null avant de mettre à jour
       getUrl();
     }
-    console.log(`downloadUrl`, downloadUrl);
   }, [progressionEtapes]);
+
 
   const handleDownloadClick = () => {
     if (downloadUrl) {
@@ -168,12 +166,13 @@ function Home({ model }) {
             {(progressionEtapes === 0) ? (
               <div>
                 {/* { <ChoixModelNiveau/> } */}
-                <FileUploader setProgressionEtapes={setProgressionEtapes} showError={showError} showPreview={showPreview} className='FileUploader'/>
+                <FileUploader setProgressionEtapes={setProgressionEtapes} showError={showError} showPreview={showPreview} setProgress={setProgress} className='FileUploader'/>
             
               </div>
                 ):(
               (progressionEtapes === 1) ? (
                 <div className='circular_back_out button_submit'>
+                  <div>Progress: {progress}%</div>
                   <CircularProgress />
                   <div className='back_out'>
                     <Button variant="outlined" color="error" onClick={cancelRequest}>
