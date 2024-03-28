@@ -11,7 +11,6 @@ from .control_file import VerificateurTexte
 from .file_checker import verifier_fichier_csv
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizerFast
 import pickle
-from django.http import FileResponse
 import zipfile
 import io
 import tempfile
@@ -24,27 +23,46 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from django.http import StreamingHttpResponse
-import time
-
-def process_file(request):
-    if request.method == 'POST' and request.FILES.get('file'):
-        file = request.FILES['file']
-        # Traitez le fichier ici
-
-        # Simulez une progression de traitement (vous devrez ajuster cela en fonction de votre logique de traitement réelle)
-        for progress in range(1, 101):
-            time.sleep(0.1)  # Simulation de traitement
-            # Envoyez un événement SSE avec la progression du traitement
-            yield f"data: {progress}%\n\n"
-
-        # Envoyez un événement SSE pour indiquer que le traitement est terminé
-        yield "data: complete\n\n"
-    else:
-        return JsonResponse({'error': 'No file provided'}, status=400)
 
 
-def event_stream(request, temp_dir):
-   def postget(temp_dir):
+def start_codification(request, temp_dir):
+   """
+    Fonction permettant de faire la codification des fichiers CSV uploadés et de retourner la progression de la transformation.
+
+    Args:
+        request: Requête HTTP.
+        temp_dir (str): Chemin vers le dossier temporaire contenant les fichiers uploadés.
+
+    Returns:
+        StreamingHttpResponse: Réponse HTTP en continu avec la progression de la transformation.
+
+    Raises:
+        Exception: Toutes les exceptions sont capturées et renvoyées dans la réponse.
+
+    Note:
+        Cette fonction utilise des techniques de streaming pour envoyer progressivement la progression
+        du traitement au client.
+
+    """
+   def predict(temp_dir):
+
+      """
+         Fonction permettant de prédire la codification CITP des emplois à partir d'un modèle.
+
+         Args:
+            temp_dir (str): Chemin vers le dossier temporaire contenant les fichiers uploadés.
+
+         Yields:
+            str: Messages SSE (Server-Sent Events) indiquant l'état et la progression du traitement.
+
+         Raises:
+            Exception: Toutes les exceptions sont capturées et renvoyées dans la réponse.
+
+         Note:
+            Cette fonction utilise des techniques de streaming pour envoyer progressivement la progression
+            du traitement au client.
+
+      """
       #yield '{"statut": "error", "message": "Une erreur est apparue lors de l\'initialisation.", "progress": 0}'
       progress_data = {
             "statut": "in progress",
@@ -57,6 +75,8 @@ def event_stream(request, temp_dir):
       yield f"data: {progress_json}\n\n"
 
       try:
+
+         # Recuperation du fichier comportant les details sur les fichiers a codifier
          with open(os.path.join(tempfile.gettempdir(), temp_dir, 'data.json'), 'r') as fichier_json:
             data = json.load(fichier_json)
          
@@ -73,18 +93,19 @@ def event_stream(request, temp_dir):
          tokenizer = DistilBertTokenizerFast.from_pretrained(tokenizer_load_path)
          
          index_item = 1
-         print("taille", len(data))
          for item in data:
+            # Recuperation des infos du fichier
             print(index_item)
             file_path = item["file_path"]
             file_name = item["name"]
             colonne = item["colonne"]
             niveau = item["niveau"]
 
+            #Lecture du fichier a codifier
             with open(file_path, 'r', encoding='latin-1') as input_file:
 
+               #Verification du fichier à codifier
                control_file = verifier_fichier_csv(input_file)
-
                if control_file['status'] == 'error':
                   yield f"data: {json.dumps({'statut': 'error', 'message': control_file['message'], 'progress': index_item * 100 / len(data)})}\n\n"
 
@@ -116,6 +137,7 @@ def event_stream(request, temp_dir):
                      progress = math.floor(((index_item - 1) / len(data)) * 100 + (100 / len(data)) * index / len(f_input))
                      yield f"data: {json.dumps({'statut': 'in progress', 'message': 'Traitement en cours', 'progress': progress})}\n\n"
 
+                  #Creation du dossier des outputs de la codification
                   output_dir = os.path.join(tempfile.gettempdir(), temp_dir, 'output')
                   if not os.path.exists(output_dir):
                      os.makedirs(output_dir)
@@ -126,7 +148,6 @@ def event_stream(request, temp_dir):
                   transformed_file_path = os.path.join(output_dir, f'transformed_data_{file_name}.csv')
                   f_input.to_csv(transformed_file_path, sep=';', index=False)
 
-                  print(errone_file_path, "\n", transformed_file_path)
 
                input_file.close()
             index_item += 1
@@ -136,7 +157,7 @@ def event_stream(request, temp_dir):
 
       yield f"data: {json.dumps({'statut': 'Complete', 'message': 'Traitement terminé avec success', 'progress': 100})}\n\n"
 
-   response = StreamingHttpResponse(postget(temp_dir), content_type="text/event-stream")
+   response = StreamingHttpResponse(predict(temp_dir), content_type="text/event-stream")
    response['Cache-Control'] = 'no-cache'
    return response
 
@@ -146,48 +167,29 @@ def get_csrf_token(request):
     return JsonResponse({'csrfToken': token})
 
 class UploadFiles(APIView):
-   def oldpost(self, request, format=None):
-      data_details = request.data.get('data_details')
-      data = []
+   """
+    Classe API permettant de gérer le téléchargement de fichiers.
 
-      if data_details:
-         details = json.loads(data_details)
-         for detail in details:
-               print(detail)
-               file_index = detail.get("index")
-               uploaded_file = request.FILES.get(file_index)
-               if uploaded_file:
-                  detail["file"] = uploaded_file
-                  data.append(detail)
-               else:
-                  return JsonResponse({
-                     "statut" : 'error',
-                     "message" : "Fichier manquant pour l'index {}".format(detail.get("name")),
-                  } , status=status.HTTP_400_BAD_REQUEST)
-
-      # Créer des répertoires temporaires
-      temp_dir = tempfile.mkdtemp(prefix="codif_")
-      print(temp_dir)
-
-      for item in data:
-         codif(item["niveau"], item["colonne"], temp_dir, item.get("file"))
-
-      
-      return JsonResponse({
-         "temp_dir" : temp_dir.split("\\")[-1],
-         "statut" : 'succes',
-         "message" : "Traitement effectuer avec succes"
-      }, status=status.HTTP_201_CREATED)
-   
+    """
    def post(self, request, format=None):
+        """
+        Méthode POST pour télécharger les fichiers et les détails associés.
+
+        Args:
+            request (Request): Requête HTTP contenant les fichiers à télécharger.
+            format (str): Format de la réponse HTTP. Par défaut, None.
+
+        Returns:
+            JsonResponse: Réponse JSON contenant le statut de la requête et des détails sur les fichiers téléchargés.
+
+        """
         data_details = request.data.get('data_details')
         data = []
-
         
         # Créer un répertoire temporaire
         temp_dir = tempfile.mkdtemp(prefix="codif_")
-        print(temp_dir)
         if data_details:
+            #recuperation des details inclus dans la requete post
             details = json.loads(data_details)
             for detail in details:
                 file_index = detail.get("index")
@@ -198,7 +200,8 @@ class UploadFiles(APIView):
                     file_path = os.path.join(temp_dir, file_name)
                     detail["file_path"] = file_path
                     data.append(detail)
-                    
+
+                    #Enregistrement dans le fichier temporaire des fichiers uploadés.
                     with open(file_path, 'wb') as destination:
                        for chunk in uploaded_file.chunks():
                            destination.write(chunk)
@@ -219,106 +222,6 @@ class UploadFiles(APIView):
             "message": "Fichiers uploader avec succès"
         }, status=status.HTTP_201_CREATED)
 
-   def get(self, request, temp_dir):
-        def postget(temp_dir):
-            #yield '{"statut": "error", "message": "Une erreur est apparue lors de l\'initialisation.", "progress": 0}'
-            progress_data = {
-                "statut": "in progress",
-                "message": "Traitement en cours",
-                "progress": 0
-            }
-            # Convertir le dictionnaire en chaîne JSON
-            progress_json = json.dumps(progress_data)
-            # Envoyer la chaîne JSON en tant que message SSE
-            yield f"data: {progress_json}\n\n"
-
-            try:
-                with open(os.path.join(tempfile.gettempdir(), temp_dir, 'data.json'), 'r') as fichier_json:
-                    data = json.load(fichier_json)
-                
-                index = 1
-                for item in data:
-                    file_path = item["file_path"]
-                    file_name = item["name"]
-                    colonne = item["colonne"]
-                    niveau = item["niveau"]
-
-                    with open(file_path, 'r', encoding='latin-1') as fichier_csv:
-                        file = fichier_csv
-
-                        verificateur = VerificateurTexte()
-                        model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_model_runpod_distillbert')
-                        tokenizer_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_tokenizer_runpod_distillbert')
-                        label_encoder_load_path =  os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'label_encoder_runpod_distill_bert.pkl')
-
-                        with open(label_encoder_load_path, "rb") as f:
-                            label_encoder = pickle.load(f)
-
-                        model = DistilBertForSequenceClassification.from_pretrained(model_load_path)
-                        tokenizer = DistilBertTokenizerFast.from_pretrained(tokenizer_load_path)
-
-                        input_file = file
-                        control_file = verifier_fichier_csv(input_file)
-
-                        if control_file['status'] == 'error':
-                            yield f"data: {json.dumps({'statut': 'error', 'message': control_file['message'], 'progress': index * 100 / len(data)})}\n\n"
-
-                        else:
-                            input_file.seek(0)
-                            #file_content = input_file.read().decode('latin-1')
-                            #file_object = StringIO(file_content)
-                            f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
-
-                            caracteres_errones = []
-                            for index, row in f_input.iterrows():
-                                text = str(row['libelle'])
-                                if verificateur.verifie_longueur(text) or verificateur.verifie_caractere_unique(text) or \
-                                verificateur.verifie_trois_successifs(text) or verificateur.verifie_chiffres_uniquement(text):
-                                    caracteres_errones.append(text)
-                                    f_input = f_input.drop(index)
-                                else:
-                                    predictions = predict_sic_code(text, model, tokenizer, label_encoder)
-                                    clef = []
-                                    valeur = []
-                                    dict_pred = {}
-                                    for i, (sic_code, certainty) in enumerate(predictions, 1):
-                                        clef.append(sic_code)
-                                        valeur.append(certainty)
-                                    for cle, valeur in zip(clef, valeur):
-                                        dict_pred[cle] = valeur
-                                    cle_max = max(dict_pred, key=dict_pred.get)
-                                    f_input.loc[index, 'Code'] = cle_max
-                                    f_input.loc[index, 'Vraisemblance'] = dict_pred[cle_max]
-
-                                progress = round((index + 1) * 100 / len(f_input))
-                                
-                                yield f"data: {json.dumps({'statut': 'in progress', 'message': 'Traitement en cours', 'progress': progress})}\n\n"
-
-                            output_dir = os.path.join(tempfile.gettempdir(), temp_dir, 'output')
-                            if not os.path.exists(output_dir):
-                              os.makedirs(output_dir)
-                            df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
-                            errone_file_path = os.path.join(tempfile.gettempdir(), temp_dir, 'output', f'errone_data_{file_name}.csv')
-                            df_errone.to_csv(errone_file_path, sep=';', index=False)
-                            transformed_file_path = os.path.join(tempfile.gettempdir(), temp_dir, 'output', f'transformed_data_{file_name}.csv')
-                            f_input.to_csv(transformed_file_path, sep=';', index=False)
-
-                            yield f"data: {json.dumps({'statut': 'Complete', 'message': 'Traitement terminé avec success', 'progress': 100})}\n\n"
-
-                    index += 1
-
-            except Exception as e:
-                yield f"data: {json.dumps({'statut': 'error', 'message': f'Une erreur est survenue: {str(e)}', 'progress': 0})}\n\n"
-
-        def generate(temp_dir):
-            for i in range(1, 101):
-                yield f'{{"statut": "error", "message": "Une erreur est apparue {i}.", "progress": 0}}'
-                time.sleep(1)
-
-        response = StreamingHttpResponse(postget(temp_dir), content_type="text/event-stream")
-        response['Cache-Control'] = 'no-cache'
-        return response
-   
 #Fonction pour la transformation du fichier
 @csrf_exempt
 def predict(request):
