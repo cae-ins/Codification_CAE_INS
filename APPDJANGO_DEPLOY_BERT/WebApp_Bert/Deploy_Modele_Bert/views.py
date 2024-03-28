@@ -324,6 +324,7 @@ def predict(request):
                      "message" : "Traitement effectuer avec succes"
                   })
             
+
       except Exception as e:
           
             print("Erreur dans le fichier:", e)
@@ -353,6 +354,7 @@ def download_page(request):
 
 #Fonction pour le telechargement du fichier transformé
 def download_transformed_csv(request, temp_dir):
+    
     print(os.path.join(tempfile.gettempdir(), temp_dir))
     temp_dir = os.path.join(tempfile.gettempdir(), temp_dir, 'output')
     print(temp_dir)
@@ -360,6 +362,7 @@ def download_transformed_csv(request, temp_dir):
     # Chemins vers les fichiers transformés
     #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
     guide_file_path = os.path.join(settings.MEDIA_ROOT, 'guide', 'guide.xlsx')
+    #transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
     #transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
     #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
     #errone_file_path = os.path.join(temp_dir, 'errone_data.csv')

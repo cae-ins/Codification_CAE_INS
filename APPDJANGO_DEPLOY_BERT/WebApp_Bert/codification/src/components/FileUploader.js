@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { Button, styled } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { submitFile } from '../utils/requestStore';
@@ -8,8 +8,6 @@ import Papa from 'papaparse';
 import InteractiveList from './FormulaireSelection';
 import { API_URL } from '../utils/constants';
 
-
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
@@ -58,17 +56,17 @@ const Demo = styled('div')(({ theme }) => ({
 }));
 
 const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress}) => {
-  console.log(`FileUploader`);
-  
+
   const [dense, setDense] = React.useState(false);
     
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  const onDrop = useCallback(async (acceptedFiles) => {
-    const csvFiles = acceptedFiles.filter(file => file.type === "text/csv");
-    const noCsvFiles = acceptedFiles.filter(file => file.type !== "text/csv");
 
-    const updatedFiles = await Promise.all(csvFiles.map(async (file) => {
+  const onDrop = useCallback(async (acceptedFiles) => {
+    const authorizedFiles = acceptedFiles.filter((file => (file.type === "text/csv") || (file.type === "application/vnd.ms-excel") || (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")));
+    const noAuthorizedFiles = acceptedFiles.filter(file => !((file.type === "text/csv") || (file.type === "application/vnd.ms-excel") || (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")));
+
+    const updatedFiles = await Promise.all(authorizedFiles.map(async (file) => {
     try {
       const colonne = await getColonneDetail(file);
       const previewData = await getPreviewData(file);
@@ -88,12 +86,16 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
     }));
   
     const filteredFiles = updatedFiles.filter(file => file !== null);
-    if (noCsvFiles.length > 0){
-      showError("Erreur", "Les fichiers suivant ne sont pas des fichiers csv : "  + noCsvFiles.map(file => file.name).join(", "));
+
+    
+    if (noAuthorizedFiles.length > 0){
+      showError("Erreur", "Les fichiers suivant ne sont pas des fichiers csv ou excel : "  + noAuthorizedFiles.map(file => file.name).join(", "));
     }
-    console.error("Ces fichiers ne sont pas des csv : ", noCsvFiles)
+    console.error("Ces fichiers ne sont pas des csv : ", noAuthorizedFiles)
     setSelectedFiles([...selectedFiles, ...filteredFiles]);
-  }, [selectedFiles]);
+    
+    console.log(`auth`, selectedFiles);
+  }, []);
 
   const removeFile = (fileName) => {
     const updatedFiles = selectedFiles.filter(file => file.name !== fileName);
@@ -103,6 +105,14 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
   const preView = (element, file) => {
     console.log("Previsualisation du fichier : ", file.name);
     showPreview(element, file.name)
+  }
+  const handleChangeCol = (file, colonne) =>{
+    let fileIndex = selectedFiles.indexOf(file)
+    let remplacementList = selectedFiles
+    remplacementList[fileIndex].selectedColonne = colonne
+
+    setSelectedFiles(remplacementList);
+    console.log(selectedFiles);
   }
 
   const startSSE = useCallback((temp_dir) => {
@@ -126,34 +136,33 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
   }, []);
 
 
-const submitFiles = useCallback(() => {
-  setProgressionEtapes(1)
-  submitFile(selectedFiles)
-  .then((data)=>{
-    if(data.statut === "succes" && data.temp_dir){
-      Cookies.set('codif_result_dir', data.temp_dir);
-      //setProgressionEtapes(2)
-      console.log(data);
-      startSSE(data.temp_dir)
-    }else{
-      if (data.statut === "error") {
-        showError(data.statut, data.message)
-        setProgressionEtapes(0)
+  const submitFiles = useCallback(() => {
+    setProgressionEtapes(1)
+    submitFile(selectedFiles)
+    .then((data)=>{
+      if(data.statut === "succes" && data.temp_dir){
+        Cookies.set('codif_result_dir', data.temp_dir);
+        //setProgressionEtapes(2)
+        console.log(data);
+        startSSE(data.temp_dir)
       }else{
-        showError("Erreur", data.message)
-        setProgressionEtapes(0)
+        if (data.statut === "error") {
+          showError(data.statut, data.message)
+          setProgressionEtapes(0)
+        }else{
+          showError("Erreur", data.message)
+          setProgressionEtapes(0)
+        }
       }
-    }
-  })
-  .catch((errors) => {
-    console.log(errors);
-    setProgressionEtapes(0)
-  })
-}, [selectedFiles]);
+    })
+    .catch((errors) => {
+      console.log(errors);
+      setProgressionEtapes(0)
+    })
+  }, [selectedFiles]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    //accept: 'text/csv', // Accepter uniquement les fichiers CSV
   });
 
   const getColonneDetail = (file) => {
@@ -198,30 +207,16 @@ const submitFiles = useCallback(() => {
   };
   
 
-  const handleChangeCol = (file, colonne) =>{
-    let fileIndex = selectedFiles.indexOf(file)
-    let remplacementList = selectedFiles
-    remplacementList[fileIndex].selectedColonne = colonne
 
-    setSelectedFiles(remplacementList);
-    console.log(selectedFiles);
-  }
-
-  const handleChangeNiveau = (file, niveau) =>{
-    let fileIndex = selectedFiles.indexOf(file)
-    let remplacementList = selectedFiles
-    remplacementList[fileIndex].niveau_codification = niveau
+  function handleChangeNiveau(file, niveau) {
+    let fileIndex = selectedFiles.indexOf(file);
+    let remplacementList = selectedFiles;
+    remplacementList[fileIndex].niveau_codification = niveau;
 
     setSelectedFiles(remplacementList);
   }
 
-  const generate = (element) => {
-    return selectedFiles.map((value) =>
-      React.cloneElement(element, {
-        key: value,
-      }),
-    );
-  }
+
 
   return (
     <div className='FileUploaderContainer_field'>
@@ -237,7 +232,15 @@ const submitFiles = useCallback(() => {
             <div>
                 <h4>Fichiers sélectionnés :</h4>
                 {/* <h4>Fichiers sélectionnés :</h4>
+                {/* <h4>Fichiers sélectionnés :</h4>
                 <div>
+                  <Stack spacing={2} direction='row' flexWrap="wrap">
+                      {selectedFiles.map((file, index) => (
+                          <Chip label={file.name} variant="outlined" onDelete={()=>{
+                              removeFile(file.name)
+                          }} />
+                      ))}
+                  </Stack>
                   <Stack spacing={2} direction='row' flexWrap="wrap">
                       {selectedFiles.map((file, index) => (
                           <Chip label={file.name} variant="outlined" onDelete={()=>{
@@ -249,6 +252,23 @@ const submitFiles = useCallback(() => {
                 <div>
                   
                 </div> */}
+                
+    <Box sx={{ flexGrow: 1, maxWidth: 752 }}>
+      <Grid container>
+        <Grid item xs={20} md={15}>
+          <Demo>
+            <List dense={dense}>
+                
+
+                {selectedFiles.map((file, index) => (
+                  <InteractiveList key={file.name + index} label={file.name} file={file} setSelectedFiles={setSelectedFiles} onDelete={()=>{removeFile(file.name)}} preView={()=>{preView(<DenseTable colonnes={file.colonne} rows={file.previewData}/>, file)}} handleChangeCol={(colonne)=>{handleChangeCol(file, colonne)}} handleChangeNiveau={(niveau)=>{handleChangeNiveau(file, niveau)}}/>
+                ))}
+              
+            </List>
+          </Demo>
+        </Grid>
+      </Grid>
+    </Box>
                 
     <Box sx={{ flexGrow: 1, maxWidth: 752 }}>
       <Grid container>
