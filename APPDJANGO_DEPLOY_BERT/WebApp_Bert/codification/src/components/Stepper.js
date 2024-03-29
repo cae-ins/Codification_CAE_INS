@@ -7,7 +7,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Check from '@mui/icons-material/Check';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
-import { CloudDownload, CloudUpload, ComputerRounded, ComputerSharp, Engineering, EngineeringRounded, EngineeringSharp, EngineeringTwoTone, EnhancedEncryption, Work, WorkHistoryRounded } from '@mui/icons-material';
+import { CloudDownload, CloudUpload, ComputerRounded } from '@mui/icons-material';
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {

@@ -113,8 +113,6 @@ export const cancelUpload = () => {
 };
 
 export const get_transform_data_url = async () => {
-  
-  const csrfToken = Cookies.get('csrftoken');
   const codif_result_dir = Cookies.get('codif_result_dir');
   try {
     return API_URL + 'download_transformed_csv/'+codif_result_dir+'/'

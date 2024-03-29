@@ -28,6 +28,8 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 
 const createEnvironmentHash = require('./webpack/persistentCache/createEnvironmentHash');
 
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 
@@ -249,6 +251,20 @@ module.exports = function (webpackEnv) {
       minimize: isEnvProduction,
       minimizer: [
         // This is only used in production mode
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            warnings: false,
+            parse: {},
+            compress: {},
+            mangle: true, // Note `mangle.properties` is `false` by default.
+            output: null,
+            toplevel: false,
+            nameCache: null,
+            ie8: false,
+            keep_fnames: false,
+          },
+        }),
+
         new TerserPlugin({
           terserOptions: {
             parse: {

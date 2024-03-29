@@ -16,13 +16,13 @@ def verifier_fichier_csv(file):
     # Lire le fichier comme un DataFrame
     try:
 
-        file_content = file.read().decode('latin-1')
+        # file_content = file.read().decode('latin-1')
                
-        # Utiliser StringIO pour créer un objet fichier virtuel
-        file_object = StringIO(file_content)
+        # # Utiliser StringIO pour créer un objet fichier virtuel
+        # file_object = StringIO(file_content)
                
         # Lire le contenu CSV dans un DataFrame
-        df = pd.read_csv(file_object, sep=";", encoding="latin-1")
+        df = pd.read_csv(file, sep=";", encoding="latin-1")
         #df = pd.read_csv()
 
     except pd.errors.EmptyDataError:
