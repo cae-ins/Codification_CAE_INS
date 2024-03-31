@@ -24,6 +24,10 @@ from rest_framework import status
 
 from django.http import StreamingHttpResponse
 
+#Les modules de classeur unique
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+
 
 def start_codification(request, temp_dir):
    """
@@ -97,23 +101,41 @@ def start_codification(request, temp_dir):
             # Recuperation des infos du fichier
             print(index_item)
             file_path = item["file_path"]
-            file_name = item["name"]
+            file_name = item["name"].split('.')[0]
             colonne = item["colonne"]
             niveau = item["niveau"]
-
+            '''
+            # Vérifier si le fichier est un fichier CSV
+            if file_path.lower().endswith('.csv') and os.path.isfile(file_path):
+                
+               with open(file_path, 'r') as file:
+                  
+                  # Déplacer le curseur de lecture au début du fichier
+                  file.seek(0)
+                  f_input_excel1 = pd.read_csv(file, sep=";", encoding="latin-1")
+                  # Chemin de sortie du fichier Excel
+                  xlsx_file_path = os.path.splitext(file_path)[0] + '.xlsx'
+                  # Écrire les données dans un fichier Excel
+                  f_input_excel1.to_excel(xlsx_file_path, index=False)
+                  # Supprimer le fichier CSV d'origine
+                  os.remove(file_path)
+             '''
             #Lecture du fichier a codifier
             with open(file_path, 'r', encoding='latin-1') as input_file:
-
+                
+               print(input_file)
                #Verification du fichier à codifier
                control_file = verifier_fichier_csv(input_file)
                if control_file['status'] == 'error':
                   yield f"data: {json.dumps({'statut': 'error', 'message': control_file['message'], 'progress': index_item * 100 / len(data)})}\n\n"
 
                else:
-                  input_file.seek(0)
-                  f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
 
-                  caracteres_errones = []
+                  input_file.seek(0)
+                  #f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
+                  f_input = pd.read_excel(file_path, engine='openpyxl')
+
+                  caracteres_errones = [] 
                   for index, row in f_input.iterrows():
                      text = str(row['libelle'])
                      if verificateur.verifie_longueur(text) or verificateur.verifie_caractere_unique(text) or \
@@ -136,17 +158,52 @@ def start_codification(request, temp_dir):
 
                      progress = math.floor(((index_item - 1) / len(data)) * 100 + (100 / len(data)) * index / len(f_input))
                      yield f"data: {json.dumps({'statut': 'in progress', 'message': 'Traitement en cours', 'progress': progress})}\n\n"
-
+                  '''
                   #Creation du dossier des outputs de la codification
                   output_dir = os.path.join(tempfile.gettempdir(), temp_dir, 'output')
                   if not os.path.exists(output_dir):
                      os.makedirs(output_dir)
                   print(output_dir)
                   df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
-                  errone_file_path = os.path.join(output_dir, f'errone_data_{file_name}.csv')
-                  df_errone.to_csv(errone_file_path, sep=';', index=False)
-                  transformed_file_path = os.path.join(output_dir, f'transformed_data_{file_name}.csv')
-                  f_input.to_csv(transformed_file_path, sep=';', index=False)
+                  errone_file_path = os.path.join(output_dir, f'errone_data_{file_name}.xlsx')
+                  #df_errone.to_csv(errone_file_path, sep=';', index=False)
+                  df_errone.to_excel(errone_file_path, index=False)
+                  transformed_file_path = os.path.join(output_dir, f'transformed_data_{file_name}.xlsx')
+                  #f_input.to_csv(transformed_file_path, sep=';', index=False)
+                  f_input.to_excel(transformed_file_path, index=False)
+                  '''
+                  #Creation du dossier des outputs de la codification
+                  output_dir = os.path.join(tempfile.gettempdir(), temp_dir, 'output')
+                  if not os.path.exists(output_dir):
+                     os.makedirs(output_dir)
+                  
+                  print(output_dir)
+
+                  df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
+                  # Créer un classeur Excel
+                  wb = Workbook()
+
+                  # Créer une feuille pour les données erronées
+                  ws_errone = wb.active
+                  ws_errone.title = 'erronee_data'
+                  for r in dataframe_to_rows(df_errone, index=False, header=True):
+                     ws_errone.append(r)
+
+                  # Créer une feuille pour les données transformées
+                  ws_transformed = wb.create_sheet(title='transformed_data')
+                  for r in dataframe_to_rows(f_input, index=False, header=True):
+                     ws_transformed.append(r)
+                  
+                  # Vérifier si la feuille par défaut 'Sheet' existe
+                  if 'Sheet' in wb.sheetnames:
+                     # Supprimer la feuille par défaut (Sheet) si elle existe
+                     default_sheet = wb['Sheet']
+                     wb.remove(default_sheet)
+         
+                  # Enregistrer le classeur dans un fichier
+                  combined_file_path = os.path.join(output_dir, f'Data_Codif_{file_name}.xlsx')
+                  wb.save(combined_file_path)
+                  
 
 
                input_file.close()
@@ -307,14 +364,14 @@ def predict(request):
                   df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
                   #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
                   #df_errone.to_csv(errone_file_path, sep =';', index=False)
-                  errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+                  errone_file_path = os.path.join(temp_dir, 'errone_data.xlsx')
                   df_errone.to_csv(errone_file_path, sep=';', index=False)
                   
                   #Exportation du fichier contenant des données transformées sur le serveur
                   #transformed_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'transformed_data.csv')
                   #f_input.to_csv(transformed_file_path, sep =';', index=False)
                   
-                  transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
+                  transformed_file_path = os.path.join(temp_dir, 'transformed_data.xlsx')
                   f_input.to_csv(transformed_file_path, sep=';', index=False)
 
                   #Renvoyer la page pour telecharger le fichier
@@ -366,7 +423,40 @@ def download_transformed_csv(request, temp_dir):
     #transformed_file_path = os.path.join(temp_dir, 'transformed_data.csv')
     #errone_file_path = os.path.join(settings.MEDIA_ROOT, 'transformed_files', 'errone_data.csv')
     #errone_file_path = os.path.join(temp_dir, 'errone_data.csv')
+    '''
+    # Initialise un nouveau classeur Excel
+    wb = Workbook()
 
+    # Ajoutez chaque fichier Excel en tant que feuille
+    for file_name in os.listdir(temp_dir):
+        if file_name.endswith('.xlsx'):  # Vérifiez si le fichier est au format Excel
+            sheet_name = os.path.splitext(file_name)[0]  # Utilisez le nom du fichier comme nom de feuille
+            sheet = wb.create_sheet(title=sheet_name)  # Créez une nouvelle feuille
+            df = pd.read_excel(os.path.join(temp_dir, file_name))  # Lisez le fichier Excel dans un DataFrame
+            for r in dataframe_to_rows(df, index=False, header=True):  # Ajoutez les données DataFrame à la feuille
+                sheet.append(r)
+
+    # Ajoutez le fichier guide en tant que feuille
+    guide_sheet = wb.create_sheet(title='Guide')
+    guide_df = pd.read_excel(guide_file_path)
+    for r in dataframe_to_rows(guide_df, index=False, header=True):
+        guide_sheet.append(r)
+
+    # Supprimez la première feuille par défaut (Sheet)
+    default_sheet = wb['Sheet']
+    wb.remove(default_sheet)
+
+    # Enregistrez le classeur dans un buffer
+    excel_buffer = io.BytesIO()
+    wb.save(excel_buffer)
+
+    # Retournez le buffer Excel pour téléchargement
+    excel_buffer.seek(0)
+    response = HttpResponse(excel_buffer.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=combined_excel.xlsx'
+    return response
+
+    '''
     # Récupérer la liste des fichiers dans le dossier temporaire
     file_names = os.listdir(temp_dir)
 
@@ -374,7 +464,7 @@ def download_transformed_csv(request, temp_dir):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
         # Ajoutez les fichiers au zip
-                # Ajoutez tous les fichiers au zip
+         # Ajoutez tous les fichiers au zip
         for file_name in file_names:
             file_path = os.path.join(temp_dir, file_name)
             zip_file.write(file_path, arcname=file_name)
@@ -389,3 +479,4 @@ def download_transformed_csv(request, temp_dir):
     response['Content-Disposition'] = 'attachment; filename=transformed_files.zip'
 
     return response
+    

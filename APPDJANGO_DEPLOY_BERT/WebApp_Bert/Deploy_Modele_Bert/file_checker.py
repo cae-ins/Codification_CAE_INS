@@ -5,14 +5,14 @@ from django.http import JsonResponse
 
 def verifier_fichier_csv(file):
 
-    # Vérifier si le fichier est d'extension CSV
-    if not file.name.endswith('.csv'):
-
+    # Vérifier si l'extension du fichier est conforme
+    if not (file.name.endswith('.csv') or file.name.endswith('.xlsx') or file.name.endswith('.xls')):
+    # Votre code ici
         return {
             'status':'error' ,
-            'message': 'Le fichier n\'est pas un fichier CSV.'
+            'message': 'Le type de fichier que vous avez fournie n\'est pas conforme'
         }
-    
+    '''
     # Lire le fichier comme un DataFrame
     try:
 
@@ -46,7 +46,7 @@ def verifier_fichier_csv(file):
             'status':'error',
             'message': 'Le nom de la colonne doit être \'libelle\'.'
             }
-
+    '''
     # Si toutes les vérifications passent, le fichier peut être traité
     return {
         'status': 'succes',

@@ -24,4 +24,5 @@ __pycache__/
 
 # Ignorer les fichiers de cache Python dans le répertoire de migrations
 APPDJANGO_DEPLOY_BERT/WebApp_Bert/Deploy_Modele_Bert/migrations/__pycache__/
+APPDJANGO_DEPLOY_BERT/WebApp_Bert/Deploy_Modele_Bert/__pycache__/
 
