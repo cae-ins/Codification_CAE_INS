@@ -19,5 +19,10 @@ APPDJANGO_DEPLOY_BERT/WebApp_Bert/codification/npm-debug.log*
 APPDJANGO_DEPLOY_BERT/WebApp_Bert/codification/yarn-debug.log*
 APPDJANGO_DEPLOY_BERT/WebApp_Bert/codification/yarn-error.log*
 
+# Ignorer les fichiers de cache Python
+__pycache__/*
+
+# Ignorer les fichiers de cache Python dans le répertoire de migrations
+APPDJANGO_DEPLOY_BERT/WebApp_Bert/Deploy_Modele_Bert/migrations/__pycache__/*
 APPDJANGO_DEPLOY_BERT/WebApp_Bert/Deploy_Modele_Bert/__pycache__/*
-APPDJANGO_DEPLOY_BERT/WebApp_Bert/Deploy_Modele_Bert/__pycache__/*
+
