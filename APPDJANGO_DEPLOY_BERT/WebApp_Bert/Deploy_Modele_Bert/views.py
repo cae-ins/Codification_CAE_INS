@@ -131,9 +131,16 @@ def start_codification(request, temp_dir):
 
                else:
 
-                  input_file.seek(0)
-                  #f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
-                  f_input = pd.read_excel(file_path, engine='openpyxl')
+                  if file_path.endswith('.csv'):
+                     # S'il s'agit d'un fichier CSV
+                     input_file.seek(0)
+                     f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
+
+                  else:
+                     #S'il s'agit d'un fichier Excel
+                     input_file.seek(0)
+                     #f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
+                     f_input = pd.read_excel(file_path, engine='openpyxl')
 
                   caracteres_errones = [] 
                   for index, row in f_input.iterrows():
@@ -180,27 +187,27 @@ def start_codification(request, temp_dir):
                   print(output_dir)
 
                   df_errone = pd.DataFrame({"libelle_errone": caracteres_errones})
-                  # Créer un classeur Excel
+                  # On crée un classeur Excel
                   wb = Workbook()
 
-                  # Créer une feuille pour les données erronées
+                  # On crée une feuille pour les données erronées
                   ws_errone = wb.active
                   ws_errone.title = 'erronee_data'
                   for r in dataframe_to_rows(df_errone, index=False, header=True):
                      ws_errone.append(r)
 
-                  # Créer une feuille pour les données transformées
+                  # On crée une feuille pour les données transformées
                   ws_transformed = wb.create_sheet(title='transformed_data')
                   for r in dataframe_to_rows(f_input, index=False, header=True):
                      ws_transformed.append(r)
                   
-                  # Vérifier si la feuille par défaut 'Sheet' existe
+                  # On Vérifie si la feuille par défaut 'Sheet' existe
                   if 'Sheet' in wb.sheetnames:
-                     # Supprimer la feuille par défaut (Sheet) si elle existe
+                     # On Supprime la feuille par défaut 'Sheet' si elle existe
                      default_sheet = wb['Sheet']
                      wb.remove(default_sheet)
          
-                  # Enregistrer le classeur dans un fichier
+                  # Enregistrement du classeur dans le repertoire de sortie
                   combined_file_path = os.path.join(output_dir, f'Data_Codif_{file_name}.xlsx')
                   wb.save(combined_file_path)
                   
