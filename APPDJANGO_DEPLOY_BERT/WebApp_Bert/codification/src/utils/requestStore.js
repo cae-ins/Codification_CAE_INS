@@ -28,12 +28,15 @@ export const submitFile = async (selectedFilesData) =>{
     // Ajouter le fichier à envoyer dans le FormData
     var details = []
     selectedFilesData.forEach((item, index) => {
-      formData.append(`file${index + 1}`, item.file);
+      const newFileName = `${item.name.split(".")[0]}.${item.id}.${item.name.split(".")[1]}`;
+      formData.append(`file${index + 1}`, item.file, newFileName);
       details.push({
+        id: item.id,
         index: `file${index + 1}`,
-        name: item.name,
+        name: newFileName,
         colonne : item.selectedColonne,
         niveau : item.niveau_codification,
+        sheet : item.sheet,
       })
     });
     formData.append("data_details", JSON.stringify(details))

@@ -7,6 +7,8 @@ import { Send } from '@mui/icons-material';
 import Papa from 'papaparse';
 import InteractiveList from './FormulaireSelection';
 import { API_URL } from '../utils/constants';
+import {v4 as uuidv4} from 'uuid';
+import readXlsxFile, { readSheetNames } from 'read-excel-file'
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -39,7 +41,7 @@ function DenseTable({ colonnes, rows }) {
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               {colonnes.map((col, index) => (
-                <TableCell key={index} align={index == 0 ? "th": "right"}>
+                <TableCell key={index} align={index === 0 ? "th": "right"}>
                   {row[col]}
                 </TableCell>
               ))}
@@ -63,20 +65,25 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
 
 
   const onDrop = useCallback(async (acceptedFiles) => {
+    console.log(`selectedFiles`, selectedFiles);
+
     const authorizedFiles = acceptedFiles.filter((file => (file.type === "text/csv") || (file.type === "application/vnd.ms-excel") || (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")));
-    const noAuthorizedFiles = acceptedFiles.filter(file => !((file.type === "text/csv") || (file.type === "application/vnd.ms-excel") || (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")));
+    const noAuthorizedFiles = acceptedFiles.filter(file => !((file.type ==="text/csv") || (file.type === "application/vnd.ms-excel") || (file.type ==="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")));
 
     const updatedFiles = await Promise.all(authorizedFiles.map(async (file) => {
     try {
-      const colonne = await getColonneDetail(file);
-      const previewData = await getPreviewData(file);
+      const {sheetNames, data} = await getPreviewData(file);
+      const id = uuidv4()
       return {
+        id: id,
         file,
         name: file.name,
-        colonne,
-        previewData,
+        // colonne : data.columns,
+        previewData : data,
         selectedColonne: null,
-        niveau_codification: null
+        niveau_codification: null,
+        sheet: sheetNames[0],
+        sheetNames,
       };
     } catch (error) {
         showError("Erreur", "Erreur lors de l'obtention des colonnes du fichier :" + error)
@@ -95,10 +102,10 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
     setSelectedFiles([...selectedFiles, ...filteredFiles]);
     
     console.log(`auth`, selectedFiles);
-  }, []);
+  }, [selectedFiles, showError]);
 
-  const removeFile = (fileName) => {
-    const updatedFiles = selectedFiles.filter(file => file.name !== fileName);
+  const removeFile = (id) => {
+    const updatedFiles = selectedFiles.filter(file => file.id !== id);
     setSelectedFiles(updatedFiles);
   };
 
@@ -121,7 +128,7 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
     eventSource.onmessage = (event) => {
         const eventData = JSON.parse(event.data);
         //console.log(`eventData`, eventData);
-        if (eventData.statut == "Complete") {
+        if (eventData.statut === "Complete") {
             setProgress(parseInt(eventData.progress));
             eventSource.close();
             setProgressionEtapes(2)
@@ -133,7 +140,7 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
     return () => {
          setProgress(7)
     };
-  }, []);
+  }, [setProgress, setProgressionEtapes]);
 
 
   const submitFiles = useCallback(() => {
@@ -159,49 +166,73 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
       console.log(errors);
       setProgressionEtapes(0)
     })
-  }, [selectedFiles]);
+  }, [selectedFiles, setProgressionEtapes, showError, startSSE]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
   });
 
-  const getColonneDetail = (file) => {
-    return new Promise((resolve, reject) => {
-      if (file) {
-        Papa.parse(file, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            console.log(`results.data`, results.data);
-            resolve(results.meta.fields);
-          },
-          error: (error) => {
-            reject(error);
-          }
-        });
-      } else {
-        reject(new Error("Le fichier n'est pas valide."));
-      }
-    });
-  };
 
   const getPreviewData = (file) => {
+
     return new Promise((resolve, reject) => {
-      if (file) {
+      if (file.type === "text/csv") {
         Papa.parse(file, {
           header: true,
           skipEmptyLines: true,
           preview: 10, // Prévisualiser les 10 premières lignes
           complete: (results) => {
-            console.log(`results.data`, results.data);
-            resolve(results.data); // Résoudre la promesse avec les données de prévisualisation
+            let data = {}
+            data[file.name] = {columns : results.meta.fields, previewData : results.data}
+            let sheetNames = [file.name]
+            resolve({sheetNames, data}); // Résoudre la promesse avec les données de prévisualisation
           },
           error: (error) => {
             reject(error);
           }
         });
-      } else {
-        reject(new Error("Le fichier n'est pas valide."));
+      }
+      if ((file.type === "application/vnd.ms-excel") || (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+
+        readSheetNames(file).then(async (sheetNames) => {
+          let fileData = {};
+          let fileSheetNames = sheetNames;
+      
+          await Promise.all(sheetNames.map(async (sheet, index) => {
+              try {
+                  const rows = await readXlsxFile(file, { sheet });
+                  const filteredRows = rows.filter(row => row.some(value => value !== null));
+                  
+                  if (filteredRows.length) {
+                      const data = filteredRows.slice(0, 11);
+                      const columns = filteredRows[0];
+                      const previewData = [];
+      
+                      for (let i = 1; i < data.length; i++) {
+                          const rowData = data[i];
+                          const obj = {};
+                          for (let j = 0; j < columns.length; j++) {
+                              obj[columns[j]] = rowData[j];
+                          }
+                          previewData.push(obj);
+                      }
+      
+                      fileData[sheet] = { columns, previewData };
+                  } else {
+                      fileSheetNames = fileSheetNames.filter(sh => sh !== sheet);
+                  }
+              } catch (error) {
+                  console.error(`Error processing sheet ${sheet}:`, error);
+                  // Gérer les erreurs ici si nécessaire
+              }
+          }));
+      
+          resolve({ sheetNames: fileSheetNames, data: fileData });
+      })
+        .catch((errors) => {
+          reject(errors)
+        })
+        
       }
     });
   };
@@ -212,6 +243,14 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
     let fileIndex = selectedFiles.indexOf(file);
     let remplacementList = selectedFiles;
     remplacementList[fileIndex].niveau_codification = niveau;
+
+    setSelectedFiles(remplacementList);
+  }
+
+  function handelChangeSheet(file, sheet) {
+    let fileIndex = selectedFiles.indexOf(file);
+    let remplacementList = selectedFiles;
+    remplacementList[fileIndex].sheet = sheet;
 
     setSelectedFiles(remplacementList);
   }
@@ -230,64 +269,21 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
         </div>
         {selectedFiles.length > 0 && (
             <div>
-                <h4>Fichiers sélectionnés :</h4>
-                {/* <h4>Fichiers sélectionnés :</h4>
-                {/* <h4>Fichiers sélectionnés :</h4>
-                <div>
-                  <Stack spacing={2} direction='row' flexWrap="wrap">
-                      {selectedFiles.map((file, index) => (
-                          <Chip label={file.name} variant="outlined" onDelete={()=>{
-                              removeFile(file.name)
-                          }} />
-                      ))}
-                  </Stack>
-                  <Stack spacing={2} direction='row' flexWrap="wrap">
-                      {selectedFiles.map((file, index) => (
-                          <Chip label={file.name} variant="outlined" onDelete={()=>{
-                              removeFile(file.name)
-                          }} />
-                      ))}
-                  </Stack>
-                </div>
-                <div>
-                  
-                </div> */}
-                
-    <Box sx={{ flexGrow: 1, maxWidth: 752 }}>
-      <Grid container>
-        <Grid item xs={20} md={15}>
-          <Demo>
-            <List dense={dense}>
-                
-
-                {selectedFiles.map((file, index) => (
-                  <InteractiveList key={file.name + index} label={file.name} file={file} setSelectedFiles={setSelectedFiles} onDelete={()=>{removeFile(file.name)}} preView={()=>{preView(<DenseTable colonnes={file.colonne} rows={file.previewData}/>, file)}} handleChangeCol={(colonne)=>{handleChangeCol(file, colonne)}} handleChangeNiveau={(niveau)=>{handleChangeNiveau(file, niveau)}}/>
-                ))}
-              
-            </List>
-          </Demo>
-        </Grid>
-      </Grid>
-    </Box>
-                
-    <Box sx={{ flexGrow: 1, maxWidth: 752 }}>
-      <Grid container>
-        <Grid item xs={20} md={15}>
-          <Demo>
-            <List dense={dense}>
-                
-
-                {selectedFiles.map((file, index) => (
-                  <InteractiveList key={file.name + index} label={file.name} file={file} setSelectedFiles={setSelectedFiles} onDelete={()=>{removeFile(file.name)}} preView={()=>{preView(<DenseTable colonnes={file.colonne} rows={file.previewData}/>, file)}} handleChangeCol={(colonne)=>{handleChangeCol(file, colonne)}} handleChangeNiveau={(niveau)=>{handleChangeNiveau(file, niveau)}}/>
-                ))}
-              
-            </List>
-          </Demo>
-        </Grid>
-      </Grid>
-    </Box>
-
-                
+                <h4>Fichiers sélectionnés :</h4>                
+                <Box sx={{ flexGrow: 1, maxWidth: '100%' }}>
+                  <Grid container>
+                    <Grid item xs={20} md={15}>
+                      <Demo>
+                        <List dense={dense}>
+                            {selectedFiles.map((file, index) => (
+                              <InteractiveList key={file.name + index} label={file.name} file={file} setSelectedFiles={setSelectedFiles} onDelete={()=>{removeFile(file.id)}} preView={()=>{preView(<DenseTable colonnes={file.previewData.hasOwnProperty(file.sheet)?file.previewData[file.sheet].columns:[]} rows={file.previewData.hasOwnProperty(file.sheet)?file.previewData[file.sheet].previewData:[]}/>, file)}} handleChangeCol={(colonne)=>{handleChangeCol(file, colonne)}} handleChangeNiveau={(niveau)=>{handleChangeNiveau(file, niveau)}} handelChangeSheet={(colonne)=>{handelChangeSheet(file, colonne)}} sheetDefault={(file.file.type === ''?file.name:'')}/>
+                            ))}
+                          
+                        </List>
+                      </Demo>
+                    </Grid>
+                  </Grid>
+                </Box>
             </div>
         )}
         <div className='button_submit'>

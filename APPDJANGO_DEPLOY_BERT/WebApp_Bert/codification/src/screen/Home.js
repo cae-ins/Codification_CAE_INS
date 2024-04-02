@@ -3,12 +3,13 @@ import FileUploader from '../components/FileUploader';
 import { useEffect, useCallback } from 'react';
 import CustomizedSteppers from '../components/Stepper';
 import { useState } from 'react';
-import { Box, Button, CircularProgress, Container, IconButton, Popover, Typography } from '@mui/material';
+import { Box, Button, Container, IconButton, Popover, Typography } from '@mui/material';
 import { Download } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Cookies from 'js-cookie';
 import { API_URL } from '../utils/constants';
 import { cancelUpload } from '../utils/requestStore';
+import CircularProgressWithLabel from '../components/circularProgress'
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -39,7 +40,7 @@ function Home({ model }) {
     if (progressionEtapes === 2 && !downloadUrl) { // Vérifiez si downloadUrl est null avant de mettre à jour
       getUrl();
     }
-  }, [progressionEtapes]);
+  }, [progressionEtapes, downloadUrl, getUrl]);
 
 
   const handleDownloadClick = () => {
@@ -173,7 +174,7 @@ function Home({ model }) {
               (progressionEtapes === 1) ? (
                 <div className='circular_back_out button_submit'>
                   <div>Progress: {progress}%</div>
-                  <CircularProgress />
+                  <CircularProgressWithLabel value={progress} />
                   <div className='back_out'>
                     <Button variant="outlined" color="error" onClick={cancelRequest}>
                       Annuler
@@ -230,17 +231,5 @@ function Home({ model }) {
       </Container>
   );
 }
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: "max-content;",
-  bgcolor: 'background.paper',
-  //border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
 
 export default Home;
