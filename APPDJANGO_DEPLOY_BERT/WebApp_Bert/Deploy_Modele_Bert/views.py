@@ -101,8 +101,10 @@ def start_codification(request, temp_dir):
             # Recuperation des infos du fichier
             print(index_item)
             file_path = item["file_path"]
+            file_id = item["id"]
             file_name = item["name"].split('.')[0]
             colonne = item["colonne"]
+            sheetName = item["sheet"]
             niveau = item["niveau"]
             '''
             # Vérifier si le fichier est un fichier CSV
@@ -140,7 +142,7 @@ def start_codification(request, temp_dir):
                      #S'il s'agit d'un fichier Excel
                      input_file.seek(0)
                      #f_input = pd.read_csv(input_file, sep=";", encoding="latin-1")
-                     f_input = pd.read_excel(file_path, engine='openpyxl')
+                     f_input = pd.read_excel(file_path, engine='openpyxl', sheet_name=sheetName)
 
                   caracteres_errones = [] 
                   for index, row in f_input.iterrows():
@@ -208,7 +210,7 @@ def start_codification(request, temp_dir):
                      wb.remove(default_sheet)
          
                   # Enregistrement du classeur dans le repertoire de sortie
-                  combined_file_path = os.path.join(output_dir, f'Data_Codif_{file_name}.xlsx')
+                  combined_file_path = os.path.join(output_dir, f'Data_Codif_{file_name}.{file_id}.xlsx')
                   wb.save(combined_file_path)
                   
 
