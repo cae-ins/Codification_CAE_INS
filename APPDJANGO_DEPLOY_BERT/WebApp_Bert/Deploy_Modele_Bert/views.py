@@ -29,7 +29,7 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
 
-def start_codification(request, temp_dir):
+def start_codification(request, temp_dir, model):
    """
     Fonction permettant de faire la codification des fichiers CSV uploadés et de retourner la progression de la transformation.
 
@@ -48,7 +48,7 @@ def start_codification(request, temp_dir):
         du traitement au client.
 
     """
-   def predict(temp_dir):
+   def predict(temp_dir, model):
 
       """
          Fonction permettant de prédire la codification CITP des emplois à partir d'un modèle.
@@ -69,10 +69,12 @@ def start_codification(request, temp_dir):
       """
       #yield '{"statut": "error", "message": "Une erreur est apparue lors de l\'initialisation.", "progress": 0}'
       progress_data = {
+          
             "statut": "in progress",
             "message": "Traitement en cours",
             "progress": 0
       }
+       
       # Convertir le dictionnaire en chaîne JSON
       progress_json = json.dumps(progress_data)
       # Envoyer la chaîne JSON en tant que message SSE
@@ -85,9 +87,24 @@ def start_codification(request, temp_dir):
             data = json.load(fichier_json)
          
          verificateur = VerificateurTexte()
-         model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_model_runpod_distillbert')
-         tokenizer_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_tokenizer_runpod_distillbert')
-         label_encoder_load_path =  os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'label_encoder_runpod_distill_bert.pkl')
+
+         if model =="produit" :
+
+            model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_model_runpod_distillbert')
+            tokenizer_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'fine_tuned_tokenizer_runpod_distillbert')
+            label_encoder_load_path =  os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert', 'label_encoder_runpod_distill_bert.pkl')
+
+         elif model =="activite" :
+
+            model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert','model2','fine_tuned_model_runpod_distillbert')
+            tokenizer_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert','model2' ,'fine_tuned_tokenizer_runpod_distillbert')
+            label_encoder_load_path =  os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert','model2', 'label_encoder_runpod_distill_bert.pkl')
+
+         else:
+
+            model_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert','model3','fine_tuned_model_runpod_distillbert')
+            tokenizer_load_path = os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert','model3' ,'fine_tuned_tokenizer_runpod_distillbert')
+            label_encoder_load_path =  os.path.join(settings.STATICFILES_DIRS[0], 'Deploy_Modele_Bert','model3', 'label_encoder_runpod_distill_bert.pkl')
 
          with open(label_encoder_load_path, "rb") as f:
             label_encoder = pickle.load(f)
@@ -223,7 +240,7 @@ def start_codification(request, temp_dir):
 
       yield f"data: {json.dumps({'statut': 'Complete', 'message': 'Traitement terminé avec success', 'progress': 100})}\n\n"
 
-   response = StreamingHttpResponse(predict(temp_dir), content_type="text/event-stream")
+   response = StreamingHttpResponse(predict(temp_dir, model), content_type="text/event-stream")
    response['Cache-Control'] = 'no-cache'
    return response
 
