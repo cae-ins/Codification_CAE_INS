@@ -37,8 +37,8 @@ urlpatterns = [
     path('get-models-details/', views.get_models_details, name='get_models_details'),
     path('upload/', views.UploadFiles.as_view(), name='upload-files'),
     path('upload/<slug:temp_dir>/', views.UploadFiles.as_view(), name='upload-files'),
-    path('stream-traitement/<slug:temp_dir>/', views.start_codification, name='stream'),
-    #path('stream-traitement/<slug:temp_dir>/<slug:model>/', views.start_codification, name='stream')
+    #path('stream-traitement/<slug:temp_dir>/', views.start_codification, name='stream'),
+    path('stream-traitement/<slug:temp_dir>/<slug:model>/', views.start_codification, name='stream')
     
 
 ]

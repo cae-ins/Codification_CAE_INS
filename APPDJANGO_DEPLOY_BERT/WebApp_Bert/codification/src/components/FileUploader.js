@@ -122,9 +122,8 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
     console.log(selectedFiles);
   }
 
-  const startSSE = useCallback((temp_dir) => {
-    console.log(`test`);
-    const eventSource = new EventSource(API_URL+'stream-traitement/'+temp_dir+'/');
+  const startSSE = useCallback((temp_dir, model) => {
+    const eventSource = new EventSource(API_URL+'stream-traitement/'+temp_dir+'/'+model+'/');
     eventSource.onmessage = (event) => {
         const eventData = JSON.parse(event.data);
         //console.log(`eventData`, eventData);
@@ -151,7 +150,7 @@ const FileUploader = ({setProgressionEtapes, showError, showPreview, setProgress
         Cookies.set('codif_result_dir', data.temp_dir);
         //setProgressionEtapes(2)
         console.log(data);
-        startSSE(data.temp_dir)
+        startSSE(data.temp_dir, "produit")
       }else{
         if (data.statut === "error") {
           showError(data.statut, data.message)
